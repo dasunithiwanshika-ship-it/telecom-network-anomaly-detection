@@ -1,7 +1,6 @@
 """
-Telecom AI Intelligence Platform (v2.0 Enterprise NOC Edition)
-Designed for Telecom Network Engineers to monitor cellular KPIs, detect anomalies,
-investigate root-cause KPI deviations, and export diagnostic reports without programming.
+Telecom AI Intelligence Platform
+Clean, simple, and intuitive interface for cellular KPI anomaly detection and investigation.
 """
 
 import sys
@@ -18,30 +17,21 @@ from src.prediction import AnomalyDetectorPipeline
 from app.components.styles import apply_custom_theme
 from app.components.sidebar import render_sidebar
 
-# Import page modules
 from app.pages import (
-    welcome,
     overview,
-    data_management,
     detection,
     investigation,
     kpi_monitoring,
-    reports,
     research_centre,
-    about,
 )
 
-# -------------------------------------------------------------
-# Streamlit App Configuration
-# -------------------------------------------------------------
 st.set_page_config(
-    page_title="Telecom AI Intelligence Platform",
+    page_title="Telecom AI Monitor",
     page_icon="📡",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Apply global dark enterprise styling
 apply_custom_theme()
 
 
@@ -55,33 +45,23 @@ def main():
     try:
         pipeline = get_pipeline()
     except Exception as e:
-        st.error(f"Critical error initializing ML Pipeline: {e}")
+        st.error(f"Error loading AI models: {e}")
         return
 
-    # Render enterprise sidebar navigation
     selected_page = render_sidebar(pipeline)
 
-    # Route to selected page module
-    if selected_page == "🏠 Welcome & Quick Start":
-        welcome.render(pipeline)
-    elif selected_page == "🌐 Network Overview":
+    if selected_page == "🏠 Overview":
         overview.render(pipeline)
-    elif selected_page == "📂 Data Upload & Validation":
-        data_management.render(pipeline)
-    elif selected_page == "⚡ AI Detection Workspace":
+    elif selected_page == "⚡ Run Detection":
         detection.render(pipeline)
-    elif selected_page == "🔬 Anomaly Investigation":
+    elif selected_page == "🔍 Inspect Alert":
         investigation.render(pipeline)
-    elif selected_page == "📊 KPI Subsystem Monitor":
+    elif selected_page == "📊 KPIs & Reports":
         kpi_monitoring.render(pipeline)
-    elif selected_page == "📑 Reports & Export":
-        reports.render(pipeline)
-    elif selected_page == "🧪 Research & Model Lab":
+    elif selected_page == "📚 Research Lab":
         research_centre.render()
-    elif selected_page == "ℹ️ About & System Guide":
-        about.render()
     else:
-        welcome.render(pipeline)
+        overview.render(pipeline)
 
 
 if __name__ == "__main__":

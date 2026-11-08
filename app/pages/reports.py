@@ -139,16 +139,17 @@ def _build_html_report(md_text: str, dataset_name: str, total: int, anomalies: i
 </html>"""
 
 
-def render(pipeline: Optional[AnomalyDetectorPipeline] = None):
+def render(pipeline: Optional[AnomalyDetectorPipeline] = None, show_header: bool = True):
     """Render the Reports & Export Center."""
     if pipeline is None:
         pipeline = AnomalyDetectorPipeline()
 
-    render_hero_banner(
-        title="Reports & Telemetry Export Center",
-        subtitle="Download complete AI detection results (CSV) and generate formatted engineering diagnostic summary reports.",
-        badge="REPORTING & EXPORT",
-    )
+    if show_header:
+        render_hero_banner(
+            title="Reports & Telemetry Export Center",
+            subtitle="Download complete AI detection results (CSV) and generate formatted engineering diagnostic summary reports.",
+            badge="REPORTING & EXPORT",
+        )
 
     last_results: Optional[pd.DataFrame] = st.session_state.get("last_results")
 

@@ -35,8 +35,8 @@ def test_pages_and_components_syntax():
 
 
 def test_navigation_options_and_kpi_metadata():
-    """Verify that all 9 navigation sections and 16 telecom KPI metadata entries are defined."""
-    assert len(NAV_OPTIONS) == 9
+    """Verify that all 5 streamlined navigation sections and 16 telecom KPI metadata entries are defined."""
+    assert len(NAV_OPTIONS) == 5
     assert len(TELECOM_KPI_METADATA) == 16
     meta = get_feature_meta("UL_NPRB_min")
     assert meta["base_kpi"] == "UL_NPRB"
