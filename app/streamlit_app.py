@@ -1,9 +1,9 @@
 """
-Telecom AI Intelligence Platform
-Enterprise Hybrid AI/ML Application for Network Anomaly Detection & KPI Intelligence.
+Telecom AI Intelligence Platform (v2.0 Enterprise NOC Edition)
+Designed for Telecom Network Engineers to monitor cellular KPIs, detect anomalies,
+investigate root-cause KPI deviations, and export diagnostic reports without programming.
 """
 
-import os
 import sys
 from pathlib import Path
 import streamlit as st
@@ -15,20 +15,20 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from src.prediction import AnomalyDetectorPipeline
-from app.components.styles import apply_custom_styles
+from app.components.styles import apply_custom_theme
 from app.components.sidebar import render_sidebar
 
 # Import page modules
 from app.pages import (
+    welcome,
     overview,
-    detection,
-    kpi_monitoring,
-    investigation,
-    ai_insights,
-    model_intelligence,
-    research_centre,
     data_management,
-    about
+    detection,
+    investigation,
+    kpi_monitoring,
+    reports,
+    research_centre,
+    about,
 )
 
 # -------------------------------------------------------------
@@ -42,12 +42,14 @@ st.set_page_config(
 )
 
 # Apply global dark enterprise styling
-apply_custom_styles()
+apply_custom_theme()
+
 
 @st.cache_resource
 def get_pipeline():
     """Initializes and caches the prediction pipeline."""
     return AnomalyDetectorPipeline()
+
 
 def main():
     try:
@@ -60,26 +62,27 @@ def main():
     selected_page = render_sidebar(pipeline)
 
     # Route to selected page module
-    if selected_page == "🌐 Network Overview":
-        overview.render()
-    elif selected_page == "⚡ Anomaly Detection":
+    if selected_page == "🏠 Welcome & Quick Start":
+        welcome.render(pipeline)
+    elif selected_page == "🌐 Network Overview":
+        overview.render(pipeline)
+    elif selected_page == "📂 Data Upload & Validation":
+        data_management.render(pipeline)
+    elif selected_page == "⚡ AI Detection Workspace":
         detection.render(pipeline)
-    elif selected_page == "📊 KPI Monitoring":
-        kpi_monitoring.render()
     elif selected_page == "🔬 Anomaly Investigation":
         investigation.render(pipeline)
-    elif selected_page == "💡 AI Insights":
-        ai_insights.render()
-    elif selected_page == "🧠 Model Intelligence":
-        model_intelligence.render()
-    elif selected_page == "📚 Research Centre":
+    elif selected_page == "📊 KPI Subsystem Monitor":
+        kpi_monitoring.render(pipeline)
+    elif selected_page == "📑 Reports & Export":
+        reports.render(pipeline)
+    elif selected_page == "🧪 Research & Model Lab":
         research_centre.render()
-    elif selected_page == "🗄️ Data Management":
-        data_management.render()
-    elif selected_page == "ℹ️ About & Documentation":
+    elif selected_page == "ℹ️ About & System Guide":
         about.render()
     else:
-        overview.render()
+        welcome.render(pipeline)
+
 
 if __name__ == "__main__":
     main()

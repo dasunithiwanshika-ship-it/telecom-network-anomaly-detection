@@ -46,14 +46,14 @@ def load_feature_importances():
     
     return df_gini, df_perm
 
-def render():
-    render_hero_banner(
-        title="AI Explainability & Feature Intelligence",
-        subtitle="Global model interpretation, feature attribution, and permutation importance on held-out test telemetry.",
-        badge="EXPLAINABLE AI (XAI)"
-    )
-    
-    render_academic_disclaimer()
+def render(show_header: bool = True):
+    if show_header:
+        render_hero_banner(
+            title="AI Explainability & Feature Intelligence",
+            subtitle="Global model interpretation, feature attribution, and permutation importance on held-out test telemetry.",
+            badge="EXPLAINABLE AI (XAI)"
+        )
+        render_academic_disclaimer()
     
     df_gini, df_perm = load_feature_importances()
     

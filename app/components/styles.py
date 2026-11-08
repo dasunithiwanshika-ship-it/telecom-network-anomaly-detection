@@ -17,7 +17,7 @@ import streamlit as st
 
 
 def apply_custom_theme():
-    """Injects custom enterprise CSS for a dark NOC-style interface."""
+    """Injects custom enterprise CSS for a dark NOC-style telecom interface."""
     st.markdown(
         """
         <style>
@@ -51,12 +51,25 @@ def apply_custom_theme():
             border-left: 5px solid #14B8A6;
             border-radius: 12px;
             padding: 22px 28px;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+        .telecom-hero-badge {
+            display: inline-block;
+            background-color: rgba(20, 184, 166, 0.15);
+            color: #14B8A6;
+            border: 1px solid rgba(20, 184, 166, 0.35);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
         .telecom-hero-banner h1 {
             color: #F8FAFC;
-            font-size: 1.85rem;
+            font-size: 1.8rem;
             font-weight: 700;
             margin: 0;
             letter-spacing: -0.3px;
@@ -66,6 +79,7 @@ def apply_custom_theme():
             font-size: 0.95rem;
             margin-top: 6px;
             margin-bottom: 0;
+            line-height: 1.5;
         }
 
         /* Metric Cards */
@@ -83,7 +97,7 @@ def apply_custom_theme():
             transform: translateY(-2px);
         }
         .telecom-metric-label {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 600;
             color: #94A3B8;
             text-transform: uppercase;
@@ -91,13 +105,13 @@ def apply_custom_theme():
             margin-bottom: 4px;
         }
         .telecom-metric-value {
-            font-size: 1.8rem;
+            font-size: 1.65rem;
             font-weight: 800;
             color: #14B8A6;
             line-height: 1.2;
         }
         .telecom-metric-subtext {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             color: #64748B;
             margin-top: 4px;
         }
@@ -108,25 +122,55 @@ def apply_custom_theme():
             border: 1px solid #1E293B;
             border-radius: 10px;
             padding: 20px 24px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
         }
         .telecom-card h3 {
             color: #F8FAFC;
-            font-size: 1.15rem;
+            font-size: 1.12rem;
             font-weight: 600;
             margin-top: 0;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border-bottom: 1px solid #1E293B;
             padding-bottom: 8px;
         }
 
-        /* Badges */
+        /* Stepper Card for Guided Workflows */
+        .step-card {
+            background-color: #172235;
+            border: 1px solid #1E293B;
+            border-top: 3px solid #14B8A6;
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-bottom: 16px;
+        }
+        .step-badge {
+            background-color: #14B8A6;
+            color: #0B1220;
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+
+        /* Status & Severity Badges */
         .badge-normal {
             background-color: rgba(16, 185, 129, 0.15);
             color: #10B981;
             border: 1px solid rgba(16, 185, 129, 0.4);
-            padding: 3px 9px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            padding: 3px 10px;
             border-radius: 6px;
             font-weight: 600;
             font-size: 0.8rem;
@@ -136,7 +180,7 @@ def apply_custom_theme():
             background-color: rgba(239, 68, 68, 0.15);
             color: #EF4444;
             border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 3px 9px;
+            padding: 3px 10px;
             border-radius: 6px;
             font-weight: 600;
             font-size: 0.8rem;
@@ -160,8 +204,8 @@ def apply_custom_theme():
             border-radius: 8px;
             padding: 12px 16px;
             color: #FDE68A;
-            font-size: 0.88rem;
-            margin: 14px 0 20px 0;
+            font-size: 0.86rem;
+            margin: 12px 0 18px 0;
             line-height: 1.45;
         }
 
@@ -172,20 +216,20 @@ def apply_custom_theme():
             border-radius: 8px;
             padding: 12px 16px;
             color: #BAE6FD;
-            font-size: 0.88rem;
-            margin: 14px 0 20px 0;
+            font-size: 0.86rem;
+            margin: 12px 0 18px 0;
             line-height: 1.45;
         }
 
-        /* Buttons Styling */
+        /* Primary Buttons Styling */
         div.stButton > button:first-child {
             background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
             color: #0B1220;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             border: none;
             border-radius: 8px;
-            padding: 10px 24px;
+            padding: 10px 20px;
             box-shadow: 0 3px 12px rgba(20, 184, 166, 0.25);
             transition: all 0.2s ease;
         }
@@ -194,6 +238,23 @@ def apply_custom_theme():
             color: #04101A;
             box-shadow: 0 4px 16px rgba(45, 212, 191, 0.4);
             transform: translateY(-1px);
+        }
+
+        /* Download Buttons Styling */
+        div.stDownloadButton > button:first-child {
+            background-color: #1E293B;
+            color: #38BDF8;
+            font-weight: 600;
+            font-size: 0.88rem;
+            border: 1px solid #38BDF8;
+            border-radius: 8px;
+            padding: 8px 18px;
+            transition: all 0.2s ease;
+        }
+        div.stDownloadButton > button:first-child:hover {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #F8FAFC;
+            border-color: #14B8A6;
         }
 
         /* Table & Dataframe Dark Customization */
@@ -206,3 +267,7 @@ def apply_custom_theme():
         """,
         unsafe_allow_html=True,
     )
+
+
+# Alias for backward compatibility across modules
+apply_custom_styles = apply_custom_theme

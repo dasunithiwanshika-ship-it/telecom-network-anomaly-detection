@@ -1,30 +1,52 @@
 """
 Enterprise NOC Sidebar Component for Telecom AI Intelligence Platform.
+Designed for intuitive navigation by Telecom Network Engineers.
 """
 
-from typing import Dict, Any, List
+from typing import List
 import streamlit as st
+
+NAV_OPTIONS: List[str] = [
+    "🏠 Welcome & Quick Start",
+    "🌐 Network Overview",
+    "📂 Data Upload & Validation",
+    "⚡ AI Detection Workspace",
+    "🔬 Anomaly Investigation",
+    "📊 KPI Subsystem Monitor",
+    "📑 Reports & Export",
+    "🧪 Research & Model Lab",
+    "ℹ️ About & System Guide",
+]
 
 
 def render_sidebar(pipeline) -> str:
     """
-    Renders the unified enterprise sidebar navigation and status monitors.
+    Renders the unified enterprise sidebar navigation and operational monitors.
 
     Returns:
         The selected page title string.
     """
+    # Handle programmatic navigation requests from action buttons
+    if "pending_nav" in st.session_state:
+        target = st.session_state.pop("pending_nav")
+        if target in NAV_OPTIONS:
+            st.session_state["nav_page"] = target
+
+    if "nav_page" not in st.session_state or st.session_state["nav_page"] not in NAV_OPTIONS:
+        st.session_state["nav_page"] = NAV_OPTIONS[0]
+
     with st.sidebar:
         # Platform Brand Header
         st.markdown(
             """
-            <div style="padding: 10px 0 16px 0; border-bottom: 1px solid #1E293B; margin-bottom: 18px;">
+            <div style="padding: 8px 0 14px 0; border-bottom: 1px solid #1E293B; margin-bottom: 14px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="background: linear-gradient(135deg, #14B8A6, #0D9488); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                    <div style="background: linear-gradient(135deg, #14B8A6, #0D9488); border-radius: 8px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
                         📡
                     </div>
                     <div>
                         <div style="font-weight: 800; font-size: 1.05rem; color: #F8FAFC; letter-spacing: -0.2px;">TELECOM AI</div>
-                        <div style="font-size: 0.72rem; color: #14B8A6; font-weight: 600; letter-spacing: 0.5px;">HYBRID INTELLIGENCE PLATFORM</div>
+                        <div style="font-size: 0.7rem; color: #14B8A6; font-weight: 600; letter-spacing: 0.5px;">NETWORK INTELLIGENCE NOC</div>
                     </div>
                 </div>
             </div>
@@ -32,58 +54,69 @@ def render_sidebar(pipeline) -> str:
             unsafe_allow_html=True,
         )
 
-        # Operational Mode Badge
+        # Active Session Telemetry Status Box
+        active_df = st.session_state.get("active_dataset_df")
+        active_name = st.session_state.get("active_dataset_name", "No batch loaded")
+        last_results = st.session_state.get("last_results")
+
+        if active_df is not None:
+            ds_badge = f"<span style='color:#10B981;font-weight:700;'>● {len(active_df):,} Cell Windows</span>"
+        else:
+            ds_badge = "<span style='color:#38BDF8;font-weight:600;'>○ Baseline Ready (32k)</span>"
+
+        if last_results is not None:
+            n_anom = int(last_results["anomaly_prediction"].sum())
+            alert_color = "#EF4444" if n_anom > 0 else "#10B981"
+            alert_text = f"{n_anom:,} Flagged Alerts" if n_anom > 0 else "0 Alerts (All Healthy)"
+        else:
+            alert_color = "#94A3B8"
+            alert_text = "Not Run Yet"
+
         st.markdown(
-            """
-            <div style="background-color: #172235; border: 1px solid #1E293B; border-radius: 6px; padding: 8px 12px; margin-bottom: 18px;">
-                <div style="font-size: 0.72rem; color: #94A3B8; font-weight: 600;">OPERATIONAL MODE</div>
-                <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px;">
-                    <span style="height: 8px; width: 8px; background-color: #10B981; border-radius: 50%; display: inline-block;"></span>
-                    <span style="font-size: 0.82rem; color: #F8FAFC; font-weight: 600;">Offline Research / Ingestion</span>
+            f"""
+            <div style="background-color: #172235; border: 1px solid #1E293B; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px;">
+                <div style="font-size: 0.7rem; color: #94A3B8; font-weight: 700; text-transform: uppercase;">WORKSPACE STATUS</div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-top: 5px;">
+                    <span style="color: #94A3B8;">Data Buffer:</span>
+                    {ds_badge}
                 </div>
-                <div style="font-size: 0.7rem; color: #64748B; margin-top: 2px;">Dataset: AliMaatouk/TelecomTS</div>
+                <div style="font-size: 0.72rem; color: #64748B; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    Source: {active_name}
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-top: 6px; padding-top: 6px; border-top: 1px solid #1E293B;">
+                    <span style="color: #94A3B8;">Active Alerts:</span>
+                    <span style="color: {alert_color}; font-weight: 700;">{alert_text}</span>
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
         st.markdown(
-            "<div style='font-size: 0.75rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;'>PLATFORM NAVIGATION</div>",
+            "<div style='font-size: 0.74rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;'>OPERATIONS & NAVIGATION</div>",
             unsafe_allow_html=True,
         )
 
-        nav_options = [
-            "🌐 Network Overview",
-            "⚡ Anomaly Detection",
-            "📊 KPI Monitoring",
-            "🔬 Anomaly Investigation",
-            "💡 AI Insights",
-            "🧠 Model Intelligence",
-            "📚 Research Centre",
-            "🗄️ Data Management",
-            "ℹ️ About & Documentation",
-        ]
-
         selected_page = st.radio(
             label="Navigation Menu",
-            options=nav_options,
-            index=0,
+            options=NAV_OPTIONS,
+            key="nav_page",
             label_visibility="collapsed",
         )
 
         st.markdown("---")
 
-        # System Model Status
+        # System Model Engine Readiness
         st.markdown(
-            "<div style='font-size: 0.75rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;'>AI MODEL ENGINE STATUS</div>",
+            "<div style='font-size: 0.72rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;'>DETECTION ENGINES</div>",
             unsafe_allow_html=True,
         )
 
         model_labels = {
-            "random_forest": "Random Forest (Supervised)",
-            "logistic_regression": "Logistic Regression (Supervised)",
-            "isolation_forest": "Isolation Forest (Unsupervised)",
-            "local_outlier_factor": "Local Outlier Factor (Unsupervised)",
+            "random_forest": "High-Precision (RF)",
+            "logistic_regression": "Fast Screening (LR)",
+            "isolation_forest": "Pattern Discovery (IF)",
+            "local_outlier_factor": "Density Scanner (LOF)",
         }
 
         for mid, mname in model_labels.items():
@@ -91,22 +124,21 @@ def render_sidebar(pipeline) -> str:
             dot_color = "#10B981" if avail else "#EF4444"
             st.markdown(
                 f"""
-                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; padding: 3px 0;">
-                    <span style="color: #94A3B8;">{mname.split(' (')[0]}</span>
-                    <span style="color: {dot_color}; font-weight: 600;">{'● Ready' if avail else '○ Offline'}</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem; padding: 2px 0;">
+                    <span style="color: #94A3B8;">{mname}</span>
+                    <span style="color: {dot_color}; font-weight: 600;">{'● Online' if avail else '○ Offline'}</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔄 Reset Current Workspace"):
-            if "last_results" in st.session_state:
-                del st.session_state["last_results"]
-            if "selected_record_idx" in st.session_state:
-                del st.session_state["selected_record_idx"]
+        if st.button("🔄 Reset Session Data", use_container_width=True, help="Clear uploaded data and detection results to start fresh."):
+            for k in ["active_dataset_df", "active_dataset_name", "last_results", "last_model_id", "last_threshold", "selected_record_id"]:
+                if k in st.session_state:
+                    del st.session_state[k]
             st.rerun()
 
-        st.caption("AI/ML Research Prototype | v2.0 Enterprise")
+        st.caption("Telecom AI Platform v2.0 | NOC Edition")
 
     return selected_page

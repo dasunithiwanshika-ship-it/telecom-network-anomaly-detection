@@ -23,14 +23,14 @@ def load_benchmark_data():
     
     return df_comp, df_thresh
 
-def render():
-    render_hero_banner(
-        title="Model Intelligence & Benchmarking",
-        subtitle="Empirical comparative evaluation of supervised classification vs unsupervised anomaly detection on 6,400 test traces.",
-        badge="BENCHMARK LAB"
-    )
-    
-    render_academic_disclaimer()
+def render(show_header: bool = True):
+    if show_header:
+        render_hero_banner(
+            title="Model Intelligence & Benchmarking",
+            subtitle="Empirical comparative evaluation of supervised classification vs unsupervised anomaly detection on 6,400 test traces.",
+            badge="BENCHMARK LAB"
+        )
+        render_academic_disclaimer()
     
     df_comp, df_thresh = load_benchmark_data()
     
