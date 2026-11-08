@@ -479,11 +479,17 @@ elif page == "🔍 3. Anomaly Detection Demo":
             st.success("✅ **Input Schema Validated:** All 64 KPI features present and formatted correctly.")
 
             if st.button("🚀 Run Anomaly Detection"):
-                with st.spinner(f"Running inference with {model_choice}..."):
+                if not pipeline.is_model_available(model_choice):
+                    st.error(
+                        f"❌ Model artifact for '{model_choice}' is not available in the models/ directory. "
+                        "Please verify model serialization."
+                    )
+                else:
                     try:
-                        results = pipeline.predict(
-                            cleaned_df, model_id=model_choice, threshold=threshold
-                        )
+                        with st.spinner(f"Running inference with {model_choice}..."):
+                            results = pipeline.predict(
+                                cleaned_df, model_id=model_choice, threshold=threshold
+                            )
 
                         total = len(results)
                         anomalies = int(results["anomaly_prediction"].sum())
@@ -566,6 +572,41 @@ elif page == "⚖️ 4. Model Comparison":
             > Cellular KPI anomalies are contextual multi-feature interactions rather than extreme geometric outliers in all 64 dimensions.
             """
         )
+
+        # Interactive Plotly grouped bar comparison
+        comp_clean = tables["comparison"].copy()
+        for col in ["Test Precision", "Test Recall", "Test F1-Score"]:
+            if col in comp_clean.columns:
+                comp_clean[col + " (Float)"] = comp_clean[col].astype(str).str.rstrip("%").astype(float)
+
+        chart_df = comp_clean.melt(
+            id_vars=["Model Name"],
+            value_vars=["Test Precision (Float)", "Test Recall (Float)", "Test F1-Score (Float)"],
+            var_name="Metric",
+            value_name="Percentage (%)",
+        )
+        chart_df["Metric"] = chart_df["Metric"].str.replace(" (Float)", "", regex=False)
+
+        bar_fig = px.bar(
+            chart_df,
+            x="Model Name",
+            y="Percentage (%)",
+            color="Metric",
+            barmode="group",
+            color_discrete_map={
+                "Test Precision": "#00e5ff",
+                "Test Recall": "#f59e0b",
+                "Test F1-Score": "#10b981",
+            },
+            title="Interactive Comparative Performance: Precision vs. Recall vs. F1-Score",
+        )
+        bar_fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            yaxis=dict(range=[0, 105]),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        )
+        st.plotly_chart(bar_fig, use_container_width=True)
 
     st.markdown("---")
     st.subheader("📈 ROC and Precision-Recall Curves")

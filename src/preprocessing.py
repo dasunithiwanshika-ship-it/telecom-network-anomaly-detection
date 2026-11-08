@@ -34,6 +34,7 @@ def validate_feature_schema(
 def clean_feature_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Handle missing values, infinities, and data types for input feature matrices.
+    Safely converts string/object inputs to numeric and imputes missing values.
 
     Args:
         df: Input feature DataFrame.
@@ -42,10 +43,13 @@ def clean_feature_data(df: pd.DataFrame) -> pd.DataFrame:
         Cleaned DataFrame with numeric types and imputed values where necessary.
     """
     cleaned = df.copy()
-    # Replace infinite values with NaN then fill with median
+    for col in cleaned.columns:
+        cleaned[col] = pd.to_numeric(cleaned[col], errors="coerce")
     cleaned = cleaned.replace([np.inf, -np.inf], np.nan)
     if cleaned.isna().any().any():
-        cleaned = cleaned.fillna(cleaned.median())
+        med = cleaned.median()
+        med = med.fillna(0.0)
+        cleaned = cleaned.fillna(med)
     return cleaned.astype(float)
 
 

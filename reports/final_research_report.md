@@ -126,8 +126,13 @@ The evaluation methodology enforces strict scientific controls:
 
 ### B. Random Forest (Optimized Bagged Ensemble)
 - **Configuration**: 100 bagged trees, `max_depth=None`, `min_samples_leaf=1`, `max_features='sqrt'` (selected via Day 9 5-Fold Stratified Cross-Validation, CV F1 = 96.01%).
-- **Performance**: Precision: **100.00%**, Recall: **93.12%**, F1: **96.44%**, ROC-AUC: **99.98%**, PR-AUC: **99.54%**.
-- **Confusion Matrix**: TP: 230, FP: 0, FN: 17, TN: 6,153. Zero false positives observed on the test set.
+- **Primary Unbiased Benchmark Performance ($\tau = 0.50$)**:
+  - Precision: **100.00%**, Recall: **93.12%**, F1: **96.44%**, ROC-AUC: **99.98%**, PR-AUC: **99.54%**.
+  - Confusion Matrix: TP: 230, FP: 0, FN: 17, TN: 6,153. Zero false positives observed on the test set.
+- **Validation-Driven Threshold Tuning ($\tau = 0.30$)**:
+  - *Methodological Control*: To prevent data leakage or test snooping, threshold optimization was conducted strictly via 5-Fold Stratified Cross-Validation on $X_{\text{train}}$. Out-of-fold validation F1 peaked at $\tau = 0.30$ (Val Precision: 98.34%, Val Recall: 95.85%, Val F1: 97.08%).
+  - *Unseen Test Set Evaluation*: Applying this CV-selected threshold ($\tau = 0.30$) once to the reserved test set yielded Precision: **99.17%**, Recall: **97.17%**, F1: **98.16%** (TP: 240, FP: 2, FN: 7, TN: 6,151).
+  - *Distinction*: The canonical $\tau = 0.50$ represents our primary unbiased benchmark, while $\tau = 0.30$ illustrates operational flexibility when network operators prioritize catching 97%+ of anomalies with negligible false alarm trade-offs.
 
 ---
 
@@ -135,13 +140,14 @@ The evaluation methodology enforces strict scientific controls:
 
 ### A. Isolation Forest
 - **Concept**: Recursively isolates samples via random orthogonal hyperplanes. Anomalies require fewer splits (shorter path lengths).
-- **Configuration**: `n_estimators=100`, `contamination=0.0386` (calibrated to the 3.86% training prevalence), `random_state=42`.
-- **Performance**: Precision: **26.05%**, Recall: **27.53%**, F1: **26.77%**, ROC-AUC: **76.12%**, PR-AUC: **21.21%**.
-- **Confusion Matrix**: TP: 68, FP: 193, FN: 179, TN: 5,960.
+- **Hyperparameter & Contamination Rigor**:
+  - *Pure Unsupervised Baseline (`contamination='auto'`)*: Default scikit-learn setting assuming no prior knowledge of target prevalence. Decision threshold is set at path length offset 0.0. Yields Precision: **18.07%**, Recall: **34.82%**, F1: **23.79%** (TP: 86, FP: 390, FN: 161, TN: 5,763).
+  - *Informed Training Prior (`contamination=0.0386`)*: Calibrated strictly to the training set anomaly prevalence ($y_{\text{train}} = 988 / 25,600 = 3.86\%$) without test-set influence. Yields Precision: **26.05%**, Recall: **27.53%**, F1: **26.77%** (TP: 68, FP: 193, FN: 179, TN: 5,960).
+  - *Invariance of Continuous Ranking*: Continuous threshold-free metrics (ROC-AUC = **76.12%**, PR-AUC = **21.21%**) are mathematically invariant to the contamination parameter.
 
 ### B. Local Outlier Factor (LOF)
 - **Concept**: Density-based algorithm comparing the local reachability density of an observation to its $k$-nearest neighbors.
-- **Configuration**: Novelty detection mode (`novelty=True`), $k=20$ neighbors, `contamination=0.0386`, standardized features.
+- **Configuration**: Novelty detection mode (`novelty=True`), $k=20$ neighbors, `contamination=0.0386` (from training prevalence prior), standardized features.
 - **Performance**: Precision: **29.84%**, Recall: **29.96%**, F1: **29.90%**, ROC-AUC: **74.38%**, PR-AUC: **23.04%**.
 - **Confusion Matrix**: TP: 74, FP: 174, FN: 173, TN: 5,979.
 
@@ -206,7 +212,12 @@ Model-agnostic evaluation measuring test accuracy drop when feature values are p
 4. `PRB_Utilization_DL_max` ($\Delta\text{acc} = +0.0075 \pm 0.0025$)
 5. `UL_BLER_mean` ($\Delta\text{acc} = +0.0060 \pm 0.0010$)
 
-*Interpretability Caution:* Statistical feature attribution indicates correlational predictive utility within TelecomTS, not physical causation.
+### C. Methodological Comparison: Why Permutation Importance Differs from Gini MDI
+- **Dataset Partition & Integrity**: Permutation importance was measured on held-out test data ($X_{\text{test}}$) using accuracy score degradation across 5 repeated shuffling runs. The model was **never refitted** on test data.
+- **Divergence of Top Features**:
+  - Gini MDI (Mean Decrease in Impurity) evaluates the training set splits. Continuous features with high granularity (such as `RSRP_mean` and `UL_SNR_mean`) offer numerous candidate split thresholds and thus accumulate large impurity reductions near the tree roots.
+  - Permutation Importance measures real generalization impact on unseen test samples. Shuffling `UL_NPRB_min` directly destroys the minimum resource allocation boundary required to flag uplink starvation faults, resulting in the largest classification error increase ($\Delta\text{acc} \approx 1.88\%$).
+- *Interpretability Caution:* Statistical feature attribution indicates correlational predictive utility within TelecomTS, not physical equipment causation.
 
 ---
 

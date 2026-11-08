@@ -51,3 +51,30 @@ These 16 traces correspond primarily to rapid temporal anomalies, such as `Fault
 ### Q8: What are the limitations regarding SLTMobitel?
 **Answer:**  
 We must be completely clear: this prototype was developed and evaluated strictly using the public `AliMaatouk/TelecomTS` cellular benchmark. It does NOT use proprietary SLTMobitel operational telemetry, does not represent Sri Lankan telecommunications infrastructure, and cannot predict physical DP/FDP cable cuts or dispatch physical repair crews. It is an algorithmic research study on cellular KPI anomaly detection.
+
+---
+
+### Q9: How was the contamination parameter in Isolation Forest chosen, and is there risk of test-set data leakage?
+**Answer:**  
+In scikit-learn, Isolation Forest tree fitting is strictly unsupervised: trees are grown by random orthogonal splits on $X_{\text{train}}$ without labels. Contamination only sets the percentile cutoff for the discrete `predict()` output.
+We evaluated two settings:
+1. **Pure Unsupervised Baseline (`contamination='auto'`)**: Assumes zero prior knowledge of ground truth, yielding Precision: 18.07%, Recall: 34.82%, F1: 23.79%.
+2. **Informed Training Prior (`contamination=0.0386`)**: Set strictly from the training set prevalence ($y_{\text{train}} = 988 / 25,600 = 3.86\%$) without touching test labels, yielding Precision: 26.05%, Recall: 27.53%, F1: 26.77%.
+Crucially, ranking metrics (ROC-AUC = 76.12%, PR-AUC = 21.21%) evaluate the inverted decision score directly and are completely invariant to the contamination parameter.
+
+---
+
+### Q10: How was the Random Forest decision threshold of 0.30 chosen, and why does canonical 0.50 remain the primary benchmark?
+**Answer:**  
+Reporting a threshold selected by searching on the test set is a classic form of data snooping (optimism bias). To ensure strict methodological validity:
+1. Our primary unbiased benchmark is the canonical threshold $\tau = 0.50$ (Precision: 100.00%, Recall: 93.12%, F1: 96.44%).
+2. To explore threshold optimization, we ran 5-Fold Stratified Cross-Validation strictly on the training set ($X_{\text{train}}$). Out-of-fold validation F1 peaked at $\tau = 0.30$ (Validation F1 = 97.08%).
+3. When evaluated once on the unseen test set, this CV-selected threshold ($\tau = 0.30$) achieved Precision: 99.17%, Recall: 97.17%, and F1: 98.16% (recovering 240 out of 247 faults with only 2 false positives).
+This demonstrates operational flexibility without test-set leakage.
+
+---
+
+### Q11: Why does Permutation Importance rank `UL_NPRB_min` as #1 while Gini MDI ranks `RSRP_mean` as #1?
+**Answer:**  
+1. **Gini MDI (Mean Decrease in Impurity)** is computed during training across tree splits. Continuous features with high granularity (like `RSRP_mean` and `UL_SNR_mean`) offer numerous candidate thresholds and naturally accumulate high split counts near the root, creating a well-known cardinality bias.
+2. **Permutation Importance** was evaluated on held-out test data without refitting the model. It measures the direct degradation in classification accuracy when a feature column is randomly shuffled. Shuffling `UL_NPRB_min` severely breaks the orthogonal decision boundaries used by the forest to distinguish uplink starvation and jamming anomalies, causing the largest accuracy drop ($\approx 1.88\%$). Both metrics agree that uplink channel and resource allocation features dominate detection.

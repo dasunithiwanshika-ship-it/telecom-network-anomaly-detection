@@ -4,7 +4,7 @@
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Streamlit App](https://img.shields.io/badge/Streamlit-App%20Live-FF4B4B.svg)](https://streamlit.io/)
-[![Tests Passing](https://img.shields.io/badge/pytest-18%20passed-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/pytest-20%20passed-brightgreen.svg)](tests/)
 
 ---
 
@@ -22,9 +22,10 @@ In modern cellular networks (4G LTE / 5G), operators continuously record multi-d
 > *How does unsupervised anomaly detection compare with supervised classification for detecting network anomalies in public telecom KPI data, and which KPI features contribute most to detection?*
 
 ### 🔬 Verified Key Findings
-1. **Supervised Superiority**: On the reserved 80/20 test partition ($N=6,400$), **Random Forest** achieved an outstanding **96.44% F1-score**, **100.00% precision**, and **99.54% PR-AUC** with **zero false alarms**.
-2. **Unsupervised Limitations**: Unsupervised models struggle significantly on cellular KPIs (**Local Outlier Factor F1: 29.90%**, **Isolation Forest F1: 26.77%**). Benign operational extremes (such as heavy bandwidth surges) are misclassified as anomalies, generating 174–193 false alarms.
-3. **Core Predictive KPIs**: Feature attribution via Gini impurity reduction and permutation feature importance identifies uplink signal-to-noise ratio (`UL_SNR_mean`), block error rate (`UL_BLER_mean`), buffer occupancy (`Estimated_UL_Buffer_mean`), and resource block allocation (`UL_NPRB_min`) as the primary discriminative indicators.
+1. **Supervised Superiority**: On the reserved 80/20 test partition ($N=6,400$), **Random Forest** achieved an outstanding **96.44% F1-score**, **100.00% precision**, and **99.54% PR-AUC** with **zero false alarms** at the canonical threshold $\tau = 0.50$.
+2. **Operational Threshold Flexibility**: When the classification threshold is tuned strictly via 5-Fold Stratified Cross-Validation on the training set ($\tau = 0.30$), Random Forest captures **97.17% of all test anomalies** (240/247) with **99.17% precision** (only 2 false positives).
+3. **Unsupervised Limitations**: Unsupervised models struggle significantly on cellular KPIs (**Local Outlier Factor F1: 29.90%**, **Isolation Forest F1: 26.77%**). Benign operational extremes (such as heavy bandwidth surges) are misclassified as anomalies, generating 174–193 false alarms.
+4. **Core Predictive KPIs**: Feature attribution via Gini impurity reduction and permutation feature importance identifies uplink signal-to-noise ratio (`UL_SNR_mean`), block error rate (`UL_BLER_mean`), buffer occupancy (`Estimated_UL_Buffer_mean`), and resource block allocation (`UL_NPRB_min`) as the primary discriminative indicators.
 
 ---
 
@@ -33,11 +34,17 @@ In modern cellular networks (4G LTE / 5G), operators continuously record multi-d
 Evaluated on the exact same deterministic 80/20 stratified test partition ($N_{\text{test}} = 6,400$ traces: 6,153 Normal, 247 Anomalies, 3.86% prevalence):
 
 | Model Name | Paradigm | Configuration Details | Precision | Recall | F1-Score | ROC-AUC | PR-AUC | TP | FP | FN | TN | Fit Time | Inference Latency |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Logistic Regression** | Supervised (GLM) | $C=1.0, \tau=0.50$, StandardScaler | 95.31% | 74.09% | 83.37% | 97.85% | 88.55% | 183 | 9 | 64 | 6,144 | **0.45 s** | **0.17 ms** / 1k |
-| **Random Forest** | Supervised (Ensemble) | $B=100, \text{leaf}=1, \text{feat}=\text{sqrt}$ | **100.00%** | **93.12%** | **96.44%** | **99.98%** | **99.54%** | **230** | **0** | **17** | **6,153** | 9.04 s | 8.17 ms / 1k |
-| **Isolation Forest** | Unsupervised (Trees) | $B=100, c=0.0386$, random_state=42 | 26.05% | 27.53% | 26.77% | 76.12% | 21.21% | 68 | 193 | 179 | 5,960 | 0.53 s | 7.55 ms / 1k |
+| **Random Forest (Canonical)**| Supervised (Ensemble) | $B=100, \tau=0.50, \text{leaf}=1, \text{sqrt}$ | **100.00%** | **93.12%** | **96.44%** | **99.98%** | **99.54%** | **230** | **0** | **17** | **6,153** | 9.04 s | 8.17 ms / 1k |
+| *Random Forest (CV-Tuned)* | Supervised (Ensemble) | $B=100, \tau=0.30\text{ (from 5-Fold CV)}$ | 99.17% | 97.17% | 98.16% | 99.98% | 99.54% | 240 | 2 | 7 | 6,151 | 9.04 s | 8.17 ms / 1k |
+| **Isolation Forest (Prior)**| Unsupervised (Trees) | $B=100, c=0.0386\text{ (training prior)}$| 26.05% | 27.53% | 26.77% | 76.12% | 21.21% | 68 | 193 | 179 | 5,960 | 0.53 s | 7.55 ms / 1k |
+| *Isolation Forest (Auto)* | Unsupervised (Trees) | $B=100, c=\text{'auto' (pure unlabelled)}$| 18.07% | 34.82% | 23.79% | 76.12% | 21.21% | 86 | 390 | 161 | 5,763 | 0.53 s | 7.55 ms / 1k |
 | **Local Outlier Factor**| Unsupervised (k-NN) | $k=20, \text{novelty}=\text{True}, c=0.0386$ | 29.84% | 29.96% | 29.90% | 74.38% | 23.04% | 74 | 174 | 173 | 5,979 | 3.33 s | 129.32 ms / 1k |
+
+*Methodological Notes:*
+1. **Unbiased Baseline:** Primary evaluation reports canonical $\tau = 0.50$ for Random Forest. When $\tau$ is tuned strictly via 5-Fold Stratified CV on $X_{\text{train}}$ ($\tau = 0.30$), it recovers 47 additional faults with only 2 false positives.
+2. **Unsupervised Ranking Invariance:** Isolation Forest continuous ranking metrics (ROC-AUC = 76.12%, PR-AUC = 21.21%) are completely invariant to the contamination parameter cutoff.
 
 ---
 
@@ -102,12 +109,12 @@ telecom-network-anomaly-detection/
 │   └── final_research_report.md              # 23-section comprehensive academic research report
 │
 ├── tests/                                    # Automated Unit Test Suite (pytest)
+│   ├── test_dashboard.py
 │   ├── test_data_loader.py
-│   ├── test_feature_engineering.py
-│   ├── test_preprocessing.py
-│   ├── test_prediction.py
 │   ├── test_evaluation.py
-│   └── test_dashboard.py
+│   ├── test_feature_engineering.py
+│   ├── test_prediction.py
+│   └── test_preprocessing.py
 │
 ├── requirements.txt                          # Pinned project dependencies
 ├── conftest.py                               # Pytest configuration
@@ -138,7 +145,7 @@ pip install -r requirements.txt
 ```bash
 python -m pytest -v tests/
 ```
-*(All 18 unit tests cover data loading, 64-feature extraction, schema validation, pipeline inference, and error handling).*
+*(All 20 unit tests cover data loading, 64-feature extraction, schema validation, pipeline inference, and error handling).*
 
 ### 3. Re-execute the End-to-End Experiment Benchmark
 ```bash

@@ -25,14 +25,18 @@ def test_validate_feature_schema():
 
 
 def test_clean_feature_data():
-    """Test handling of NaN and Inf values."""
+    """Test handling of NaN, Inf, and non-numeric string values."""
     df = create_synthetic_demo_features(n_samples=5)
     df.loc[0, "RSRP_mean"] = np.nan
     df.loc[1, "UL_BLER_mean"] = np.inf
+    # Cast to object first to simulate raw CSV string ingestion
+    df["UL_SNR_mean"] = df["UL_SNR_mean"].astype(object)
+    df.loc[2, "UL_SNR_mean"] = "corrupted_str_val"
 
     cleaned = clean_feature_data(df)
     assert not cleaned.isna().any().any()
     assert not np.isinf(cleaned.values).any()
+    assert isinstance(cleaned.loc[2, "UL_SNR_mean"], (float, np.floating))
 
 
 def test_telecom_preprocessor():

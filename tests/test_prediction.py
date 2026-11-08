@@ -49,3 +49,19 @@ def test_empty_dataframe_error(pipeline):
     with pytest.raises(ValueError) as excinfo:
         pipeline.predict(empty_df, model_id="random_forest")
     assert "empty" in str(excinfo.value).lower()
+
+
+def test_missing_model_error(pipeline):
+    """Test that requesting an uninitialized model raises KeyError."""
+    demo_df = create_synthetic_demo_features(n_samples=3)
+    with pytest.raises(KeyError) as excinfo:
+        pipeline.predict(demo_df, model_id="non_existent_neural_network")
+    assert "not loaded" in str(excinfo.value)
+
+
+def test_threshold_effect(pipeline):
+    """Verify that lowering threshold on supervised models increases anomaly predictions."""
+    demo_df = create_synthetic_demo_features(n_samples=20, random_state=42)
+    res_high = pipeline.predict(demo_df, model_id="random_forest", threshold=0.90)
+    res_low = pipeline.predict(demo_df, model_id="random_forest", threshold=0.10)
+    assert res_low["anomaly_prediction"].sum() >= res_high["anomaly_prediction"].sum()
