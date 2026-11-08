@@ -30,6 +30,7 @@ class AnomalyDetectorPipeline:
         self.models_dir = models_dir
         self.models: Dict[str, Any] = {}
         self.scaler: Optional[Any] = None
+        self.baseline_stats: Optional[Dict[str, Any]] = None
         self._load_all_available_models()
 
     def _load_all_available_models(self) -> None:
@@ -44,6 +45,13 @@ class AnomalyDetectorPipeline:
                 self.scaler = joblib.load(scaler_path)
             except Exception as e:
                 print(f"Warning: Failed to load scaler from {scaler_path}: {e}")
+
+        stats_path = os.path.join(self.models_dir, "normal_baseline_stats.joblib")
+        if os.path.exists(stats_path):
+            try:
+                self.baseline_stats = joblib.load(stats_path)
+            except Exception as e:
+                print(f"Warning: Failed to load baseline stats from {stats_path}: {e}")
 
         for model_id in self.AVAILABLE_MODELS:
             path = os.path.join(self.models_dir, f"{model_id}.joblib")
@@ -166,3 +174,52 @@ class AnomalyDetectorPipeline:
         result_df["anomaly_status"] = np.where(preds == 1, "Anomaly", "Normal")
 
         return result_df
+
+    def explain_record(
+        self, record: Union[pd.Series, Dict[str, Any]], top_k: int = 6
+    ) -> pd.DataFrame:
+        """
+        Explain why a specific observation deviates from normal network behavior.
+        Computes empirical z-score deviations relative to the normal cellular population.
+
+        Args:
+            record: Series or dict containing values for the 64 KPI features.
+            top_k: Number of highest deviating features to return.
+
+        Returns:
+            Ranked DataFrame of top deviating features with statistical comparisons.
+        """
+        if self.baseline_stats is None:
+            raise RuntimeError("Baseline normal statistics artifact not loaded.")
+
+        if isinstance(record, dict):
+            s = pd.Series(record)
+        else:
+            s = record.copy()
+
+        norm_mean = self.baseline_stats["mean"]
+        norm_std = self.baseline_stats["std"]
+        norm_median = self.baseline_stats["median"]
+        norm_q05 = self.baseline_stats["q05"]
+        norm_q95 = self.baseline_stats["q95"]
+
+        rows = []
+        for col in FEATURE_COLUMNS:
+            if col in s.index:
+                val = float(s[col])
+                m = float(norm_mean[col])
+                sd = float(norm_std[col]) if float(norm_std[col]) > 1e-9 else 1.0
+                z = (val - m) / sd
+                rows.append({
+                    "Feature": col,
+                    "Observed Value": round(val, 4),
+                    "Normal Mean": round(m, 4),
+                    "Normal Median": round(float(norm_median[col]), 4),
+                    "Normal 5th-95th Range": f"[{float(norm_q05[col]):.2f}, {float(norm_q95[col]):.2f}]",
+                    "Z-Score (Dev.)": round(z, 2),
+                    "Abs Z-Score": round(abs(z), 2),
+                    "Status": "Severely Elevated" if z > 3.0 else ("Elevated" if z > 1.5 else ("Severely Depressed" if z < -3.0 else ("Depressed" if z < -1.5 else "Normal Range"))),
+                })
+
+        df_exp = pd.DataFrame(rows).sort_values(by="Abs Z-Score", ascending=False)
+        return df_exp.head(top_k)
