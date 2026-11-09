@@ -214,36 +214,36 @@ def create_severity_breakdown_bars(df: pd.DataFrame) -> go.Figure:
     return apply_dark_chart_layout(fig, height=250)
 
 
-def create_topology_network_graph() -> go.Figure:
+def create_topology_network_graph(selected_node: Optional[str] = None) -> go.Figure:
     """Create an interactive network topology diagram showing Core, Switches, and Cell Sites."""
     nodes_x = [0.5, 0.25, 0.75, 0.1, 0.25, 0.4, 0.6, 0.75, 0.9]
-    nodes_y = [0.9, 0.6, 0.6, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
+    nodes_y = [0.88, 0.58, 0.58, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22]
     node_names = [
         "Core UPF (5GC)",
         "Agg-Switch-North",
         "Agg-Switch-South",
-        "Cell-Macro-01",
-        "Cell-Macro-02",
-        "Cell-Small-03",
-        "Cell-Macro-04",
-        "Cell-Small-05",
-        "Cell-Macro-06",
+        "cell-macro-01",
+        "cell-macro-02",
+        "cell-small-03",
+        "cell-macro-04",
+        "cell-small-05",
+        "cell-macro-06",
     ]
     node_status = [
-        "Optimal (100%)",
-        "Optimal (99%)",
-        "Optimal (99%)",
-        "Optimal",
-        "Degraded (High BLER)",
-        "Optimal",
-        "Critical (Buffer Backlog)",
-        "Optimal",
-        "Optimal",
+        "Optimal (100% Availability)",
+        "Optimal (10 Gbps Uplink)",
+        "Optimal (10 Gbps Uplink)",
+        "Optimal (42% PRB Load)",
+        "Degraded (High BLER 12.4%)",
+        "Optimal (35% PRB Load)",
+        "Critical (Buffer Full 94%)",
+        "Optimal (18% PRB Load)",
+        "Optimal (45% PRB Load)",
     ]
     node_colors = [
         "#0EA5E9",
-        "#3B82F6",
-        "#3B82F6",
+        "#8B5CF6",
+        "#8B5CF6",
         "#10B981",
         "#F59E0B",
         "#10B981",
@@ -251,6 +251,11 @@ def create_topology_network_graph() -> go.Figure:
         "#10B981",
         "#10B981",
     ]
+
+    # Adjust size and border width for selected node
+    node_sizes = [28 if (selected_node and n.lower() in selected_node.lower()) else 20 for n in node_names]
+    border_widths = [3 if (selected_node and n.lower() in selected_node.lower()) else 1.5 for n in node_names]
+    border_colors = ["#FFFFFF" if (selected_node and n.lower() in selected_node.lower()) else "#080C14" for n in node_names]
 
     edge_x = []
     edge_y = []
@@ -260,6 +265,7 @@ def create_topology_network_graph() -> go.Figure:
         edge_y.extend([nodes_y[u], nodes_y[v], None])
 
     fig = go.Figure()
+    # Edges
     fig.add_trace(
         go.Scatter(
             x=edge_x,
@@ -269,6 +275,7 @@ def create_topology_network_graph() -> go.Figure:
             hoverinfo="none",
         )
     )
+    # Nodes
     fig.add_trace(
         go.Scatter(
             x=nodes_x,
@@ -276,23 +283,29 @@ def create_topology_network_graph() -> go.Figure:
             mode="markers+text",
             text=[f"<b>{name}</b>" for name in node_names],
             textposition="bottom center",
-            textfont=dict(size=9.5, color="#94A3B8"),
+            textfont=dict(size=9.5, color="#CBD5E1"),
             marker=dict(
-                size=18,
+                size=node_sizes,
                 color=node_colors,
-                line=dict(color="#0B101B", width=2),
+                line=dict(color=border_colors, width=border_widths),
             ),
-            hovertext=[f"Node: {n}<br>Status: {s}" for n, s in zip(node_names, node_status)],
+            hovertext=[f"Node: {n}<br>Role: {s}" for n, s in zip(node_names, node_status)],
             hoverinfo="text",
         )
     )
+
+    # Layer annotations
+    fig.add_annotation(x=0.02, y=0.88, text="CORE LAYER", showarrow=False, font=dict(size=9, color="#64748B"), xanchor="left")
+    fig.add_annotation(x=0.02, y=0.58, text="AGGREGATION", showarrow=False, font=dict(size=9, color="#64748B"), xanchor="left")
+    fig.add_annotation(x=0.02, y=0.22, text="RADIO ACCESS", showarrow=False, font=dict(size=9, color="#64748B"), xanchor="left")
+
     fig.update_layout(
-        title="Infrastructure Topo-Map (Radio Access Network Hierarchy)",
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        title="Interactive Radio Access Network Topology",
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.05, 1.05]),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[0.05, 1.0]),
         showlegend=False,
     )
-    return apply_dark_chart_layout(fig, height=300)
+    return apply_dark_chart_layout(fig, height=320)
 
 
 def create_kpi_radar_chart(

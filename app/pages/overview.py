@@ -1,7 +1,7 @@
 """
 Page 02: NOC Network Overview & Operational Intelligence.
-Refined enterprise interface featuring radial health gauges, top status ribbon,
-system forecast notices, infrastructure inventory, and interactive topology map.
+Refined enterprise interface featuring radial health gauges, status ribbon,
+predictive risk forecasts, and an interactive Radio Access Network topology inspector.
 """
 
 from typing import Optional, Tuple, Any
@@ -21,6 +21,114 @@ from ..components.charts import (
     create_donut_class_distribution,
 )
 from src.data_loader import load_processed_features
+
+
+NODE_TELEMETRY_DATA = {
+    "cell-macro-02": {
+        "title": "cell-macro-02 (eNodeB Sector 2)",
+        "ip": "10.14.2.12",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-North",
+        "prb": "78%",
+        "bler": "12.4% (Threshold: 8.0%)",
+        "rsrp": "-104 dBm",
+        "snr": "8.5 dB",
+        "status": "DEGRADED",
+        "status_class": "pill-high",
+        "note": "High downlink block error rate detected. Review link adaptation MCS and MIMO channel fading.",
+    },
+    "cell-macro-04": {
+        "title": "cell-macro-04 (eNodeB Sector 3)",
+        "ip": "10.14.2.14",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-South",
+        "prb": "94%",
+        "bler": "4.2%",
+        "rsrp": "-96 dBm",
+        "snr": "11.2 dB",
+        "status": "CRITICAL",
+        "status_class": "pill-critical",
+        "note": "Uplink queue buffer backlog stall. PRB capacity near 100% saturation. Immediate load balancing required.",
+    },
+    "cell-macro-01": {
+        "title": "cell-macro-01 (eNodeB Sector 1)",
+        "ip": "10.14.2.11",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-North",
+        "prb": "42%",
+        "bler": "1.1%",
+        "rsrp": "-88 dBm",
+        "snr": "18.4 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "cell-small-03": {
+        "title": "cell-small-03 (gNodeB Hotspot)",
+        "ip": "10.14.3.15",
+        "role": "gNodeB Small Cell",
+        "switch": "Agg-Switch-North",
+        "prb": "35%",
+        "bler": "0.9%",
+        "rsrp": "-82 dBm",
+        "snr": "21.0 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "cell-small-05": {
+        "title": "cell-small-05 (gNodeB Micro Cell)",
+        "ip": "10.14.3.17",
+        "role": "gNodeB Small Cell",
+        "switch": "Agg-Switch-South",
+        "prb": "18%",
+        "bler": "0.6%",
+        "rsrp": "-79 dBm",
+        "snr": "23.5 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "cell-macro-06": {
+        "title": "cell-macro-06 (eNodeB Sector 4)",
+        "ip": "10.14.2.16",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-South",
+        "prb": "45%",
+        "bler": "1.4%",
+        "rsrp": "-91 dBm",
+        "snr": "16.8 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "agg-switch-01": {
+        "title": "Agg-Switch-North (Backhaul Aggregation)",
+        "ip": "10.14.1.2",
+        "role": "Aggregation Switch",
+        "switch": "Core UPF",
+        "prb": "28% BW",
+        "bler": "0.0%",
+        "rsrp": "N/A",
+        "snr": "N/A",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "10 Gbps optical fiber backhaul link nominal.",
+    },
+    "core-upf-01": {
+        "title": "Core UPF (5G User Plane Function)",
+        "ip": "10.14.0.1",
+        "role": "5G Core Gateway",
+        "switch": "Edge Fabric",
+        "prb": "31% CPU",
+        "bler": "0.0%",
+        "rsrp": "N/A",
+        "snr": "N/A",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Core data plane latency 2.1ms with zero packet drops.",
+    },
+}
 
 
 @st.cache_data
@@ -110,73 +218,84 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 4. Infrastructure Inventory & Topo-Map
-    col_inv, col_topo = st.columns([1.1, 1])
+    # 4. Interactive RAN Topology & Node Inspector
+    st.markdown("### Radio Access Network Topology & Node Diagnostics")
+    st.caption("Inspect live cell towers, aggregation switches, and core gateway hierarchy:")
 
-    with col_inv:
+    col_topo, col_node = st.columns([1.3, 1])
+
+    # Node selection control
+    node_keys = list(NODE_TELEMETRY_DATA.keys())
+    node_labels = [NODE_TELEMETRY_DATA[k]["title"] for k in node_keys]
+
+    with col_node:
         st.markdown(
             """
-            <div class="telecom-card">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <h3 style="margin: 0; font-size: 0.95rem;">Infrastructure Inventory</h3>
-                    <span style="font-size: 0.72rem; color: #64748B; font-weight: 600;">30 NODES REGISTERED</span>
+            <div class="telecom-card" style="min-height: 320px;">
+                <h3 style="margin-bottom: 8px;">Node Telemetry Inspector</h3>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        chosen_node_idx = st.selectbox(
+            "Select Network Node to Inspect:",
+            range(len(node_keys)),
+            format_func=lambda i: node_labels[i],
+            index=0,  # Default to cell-macro-02 (degraded)
+            key="topo_node_selector",
+        )
+        selected_key = node_keys[chosen_node_idx]
+        node_info = NODE_TELEMETRY_DATA[selected_key]
+
+        st.markdown(
+            f"""
+            <div style="margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 0.92rem; font-weight: 700; color: #F8FAFC;">{node_info['title']}</span>
+                    <span class="{node_info['status_class']}">{node_info['status']}</span>
                 </div>
                 
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; color: #CBD5E1;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid #1A263D; color: #64748B; text-align: left; font-size: 0.7rem; text-transform: uppercase;">
-                            <th style="padding: 6px 4px;">Node Identity</th>
-                            <th style="padding: 6px 4px;">Role</th>
-                            <th style="padding: 6px 4px;">Load</th>
-                            <th style="padding: 6px 4px;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid #141E30;">
-                            <td style="padding: 8px 4px; font-weight: 600; color: #F8FAFC;">cell-macro-01</td>
-                            <td style="padding: 8px 4px; color: #94A3B8;">eNodeB Sector 1</td>
-                            <td style="padding: 8px 4px; color: #10B981;">42% PRB</td>
-                            <td style="padding: 8px 4px;"><span class="pill-normal">OPTIMAL</span></td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #141E30;">
-                            <td style="padding: 8px 4px; font-weight: 600; color: #F8FAFC;">cell-macro-02</td>
-                            <td style="padding: 8px 4px; color: #94A3B8;">eNodeB Sector 2</td>
-                            <td style="padding: 8px 4px; color: #F59E0B;">78% PRB</td>
-                            <td style="padding: 8px 4px;"><span class="pill-high">HIGH BLER</span></td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #141E30;">
-                            <td style="padding: 8px 4px; font-weight: 600; color: #F8FAFC;">cell-small-03</td>
-                            <td style="padding: 8px 4px; color: #94A3B8;">gNodeB Hotspot</td>
-                            <td style="padding: 8px 4px; color: #10B981;">35% PRB</td>
-                            <td style="padding: 8px 4px;"><span class="pill-normal">OPTIMAL</span></td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #141E30;">
-                            <td style="padding: 8px 4px; font-weight: 600; color: #F8FAFC;">cell-macro-04</td>
-                            <td style="padding: 8px 4px; color: #94A3B8;">eNodeB Sector 3</td>
-                            <td style="padding: 8px 4px; color: #EF4444;">94% PRB</td>
-                            <td style="padding: 8px 4px;"><span class="pill-critical">BUFFER FULL</span></td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #141E30;">
-                            <td style="padding: 8px 4px; font-weight: 600; color: #F8FAFC;">agg-switch-01</td>
-                            <td style="padding: 8px 4px; color: #94A3B8;">Backhaul Switch</td>
-                            <td style="padding: 8px 4px; color: #10B981;">28% BW</td>
-                            <td style="padding: 8px 4px;"><span class="pill-normal">OPTIMAL</span></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 4px; font-weight: 600; color: #F8FAFC;">core-upf-01</td>
-                            <td style="padding: 8px 4px; color: #94A3B8;">5G User Plane</td>
-                            <td style="padding: 8px 4px; color: #10B981;">31% CPU</td>
-                            <td style="padding: 8px 4px;"><span class="pill-normal">OPTIMAL</span></td>
-                        </tr>
-                    </tbody>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #CBD5E1; margin-bottom: 12px;">
+                    <tr style="border-bottom: 1px solid #1A263D;">
+                        <td style="padding: 5px 0; color: #64748B;">Node Role / Type</td>
+                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['role']}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #1A263D;">
+                        <td style="padding: 5px 0; color: #64748B;">IP Address</td>
+                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #38BDF8;">{node_info['ip']}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #1A263D;">
+                        <td style="padding: 5px 0; color: #64748B;">Uplink Gateway</td>
+                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #CBD5E1;">{node_info['switch']}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #1A263D;">
+                        <td style="padding: 5px 0; color: #64748B;">PRB Spectrum Load</td>
+                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['prb']}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #1A263D;">
+                        <td style="padding: 5px 0; color: #64748B;">Downlink BLER</td>
+                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: {'#EF4444' if 'DEGRADED' in node_info['status'] else '#10B981'};">{node_info['bler']}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #64748B;">Radio RSRP / SNR</td>
+                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['rsrp']} / {node_info['snr']}</td>
+                    </tr>
                 </table>
+
+                <div style="background: #080C14; border: 1px solid #1A263D; border-radius: 4px; padding: 8px 10px; font-size: 0.76rem; color: #94A3B8; line-height: 1.4; margin-bottom: 12px;">
+                    {node_info['note']}
+                </div>
+            </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
+        if st.button(f"Triage Alarms for {selected_key} →", use_container_width=True, key="btn_triage_selected_node"):
+            navigate_to("05 — Alert Management")
+
     with col_topo:
-        topo_fig = create_topology_network_graph()
+        topo_fig = create_topology_network_graph(selected_node=selected_key)
         st.plotly_chart(topo_fig, use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -204,8 +323,8 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     c_btn1, c_btn2 = st.columns(2)
     with c_btn1:
-        if st.button("Ingest Network Data (Stage 03)", use_container_width=True, key="btn_ov_ingest"):
+        if st.button("Ingest Network Data (Stage 03) →", use_container_width=True, key="btn_ov_ingest"):
             navigate_to("03 — Data Ingestion")
     with c_btn2:
-        if st.button("Configure AI Detection (Stage 04)", use_container_width=True, key="btn_ov_detect"):
+        if st.button("Configure AI Detection (Stage 04) →", use_container_width=True, key="btn_ov_detect"):
             navigate_to("04 — AI Detection")
