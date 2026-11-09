@@ -12,6 +12,7 @@ import streamlit as st
 from ..components.metric_cards import (
     render_hero_banner,
     render_noc_status_strip,
+    render_html,
     navigate_to,
 )
 from ..components.charts import (
@@ -142,7 +143,7 @@ def _get_baseline_dataset():
 def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmark_tables: Any = None):
     """Render the executive NOC Overview screen."""
     now_str = datetime.now().strftime("%I:%M:%S %p")
-    st.markdown(
+    render_html(
         f"""
         <div class="noc-topbar">
             <div>
@@ -160,8 +161,7 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     # 1. Top Status Ribbon
@@ -197,7 +197,7 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
     # 3. System Forecast Alert Banner
     col_fc_text, col_fc_btn = st.columns([3, 1])
     with col_fc_text:
-        st.markdown(
+        render_html(
             """
             <div class="noc-forecast-banner">
                 <div>
@@ -208,8 +208,7 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
                     </div>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
     with col_fc_btn:
         st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
@@ -229,70 +228,67 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
     node_labels = [NODE_TELEMETRY_DATA[k]["title"] for k in node_keys]
 
     with col_node:
-        st.markdown(
-            """
-            <div class="telecom-card" style="min-height: 320px;">
-                <h3 style="margin-bottom: 8px;">Node Telemetry Inspector</h3>
-            """,
-            unsafe_allow_html=True,
-        )
+        with st.container(border=True):
+            render_html(
+                """
+                <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1rem;">Node Telemetry Inspector</h3>
+                """
+            )
 
-        chosen_node_idx = st.selectbox(
-            "Select Network Node to Inspect:",
-            range(len(node_keys)),
-            format_func=lambda i: node_labels[i],
-            index=0,  # Default to cell-macro-02 (degraded)
-            key="topo_node_selector",
-        )
-        selected_key = node_keys[chosen_node_idx]
-        node_info = NODE_TELEMETRY_DATA[selected_key]
+            chosen_node_idx = st.selectbox(
+                "Select Network Node to Inspect:",
+                range(len(node_keys)),
+                format_func=lambda i: node_labels[i],
+                index=0,  # Default to cell-macro-02 (degraded)
+                key="topo_node_selector",
+            )
+            selected_key = node_keys[chosen_node_idx]
+            node_info = NODE_TELEMETRY_DATA[selected_key]
 
-        st.markdown(
-            f"""
-            <div style="margin-top: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-size: 0.92rem; font-weight: 700; color: #F8FAFC;">{node_info['title']}</span>
-                    <span class="{node_info['status_class']}">{node_info['status']}</span>
+            render_html(
+                f"""
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 0.92rem; font-weight: 700; color: #F8FAFC;">{node_info['title']}</span>
+                        <span class="{node_info['status_class']}">{node_info['status']}</span>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #CBD5E1; margin-bottom: 12px;">
+                        <tr style="border-bottom: 1px solid #1A263D;">
+                            <td style="padding: 5px 0; color: #64748B;">Node Role / Type</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['role']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #1A263D;">
+                            <td style="padding: 5px 0; color: #64748B;">IP Address</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #38BDF8;">{node_info['ip']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #1A263D;">
+                            <td style="padding: 5px 0; color: #64748B;">Uplink Gateway</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #CBD5E1;">{node_info['switch']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #1A263D;">
+                            <td style="padding: 5px 0; color: #64748B;">PRB Spectrum Load</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['prb']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #1A263D;">
+                            <td style="padding: 5px 0; color: #64748B;">Downlink BLER</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: {'#EF4444' if 'DEGRADED' in node_info['status'] else '#10B981'};">{node_info['bler']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 0; color: #64748B;">Radio RSRP / SNR</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['rsrp']} / {node_info['snr']}</td>
+                        </tr>
+                    </table>
+
+                    <div style="background: #080C14; border: 1px solid #1A263D; border-radius: 4px; padding: 8px 10px; font-size: 0.76rem; color: #94A3B8; line-height: 1.4; margin-bottom: 12px;">
+                        {node_info['note']}
+                    </div>
                 </div>
-                
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #CBD5E1; margin-bottom: 12px;">
-                    <tr style="border-bottom: 1px solid #1A263D;">
-                        <td style="padding: 5px 0; color: #64748B;">Node Role / Type</td>
-                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['role']}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #1A263D;">
-                        <td style="padding: 5px 0; color: #64748B;">IP Address</td>
-                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #38BDF8;">{node_info['ip']}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #1A263D;">
-                        <td style="padding: 5px 0; color: #64748B;">Uplink Gateway</td>
-                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #CBD5E1;">{node_info['switch']}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #1A263D;">
-                        <td style="padding: 5px 0; color: #64748B;">PRB Spectrum Load</td>
-                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['prb']}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #1A263D;">
-                        <td style="padding: 5px 0; color: #64748B;">Downlink BLER</td>
-                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: {'#EF4444' if 'DEGRADED' in node_info['status'] else '#10B981'};">{node_info['bler']}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 5px 0; color: #64748B;">Radio RSRP / SNR</td>
-                        <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['rsrp']} / {node_info['snr']}</td>
-                    </tr>
-                </table>
+                """
+            )
 
-                <div style="background: #080C14; border: 1px solid #1A263D; border-radius: 4px; padding: 8px 10px; font-size: 0.76rem; color: #94A3B8; line-height: 1.4; margin-bottom: 12px;">
-                    {node_info['note']}
-                </div>
-            </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        if st.button(f"Triage Alarms for {selected_key} →", use_container_width=True, key="btn_triage_selected_node"):
-            navigate_to("05 — Alert Management")
+            if st.button(f"Triage Alarms for {selected_key} →", use_container_width=True, key="btn_triage_selected_node"):
+                navigate_to("05 — Alert Management")
 
     with col_topo:
         topo_fig = create_topology_network_graph(selected_node=selected_key)

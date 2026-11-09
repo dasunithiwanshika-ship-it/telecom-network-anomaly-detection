@@ -25,6 +25,11 @@ def render_sidebar(pipeline=None) -> str:
         target = st.session_state.pop("pending_nav")
         if target in NAV_OPTIONS:
             st.session_state["nav_page"] = target
+        else:
+            for opt in NAV_OPTIONS:
+                if target[:2] in opt or any(word in opt for word in target.split()):
+                    st.session_state["nav_page"] = opt
+                    break
 
     if "nav_page" not in st.session_state or st.session_state["nav_page"] not in NAV_OPTIONS:
         st.session_state["nav_page"] = NAV_OPTIONS[0]

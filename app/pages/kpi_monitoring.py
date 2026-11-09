@@ -143,32 +143,30 @@ def render(pipeline: Optional[Any] = None, dataset_tuple: Optional[Tuple] = None
     st.markdown("<br>", unsafe_allow_html=True)
 
     # 4. Target Record Selection
-    st.markdown(
-        """
-        <div class="telecom-card">
-            <h3 style="margin-bottom: 6px;">Targeted Record Investigation</h3>
+    with st.container(border=True):
+        st.markdown(
+            """
+            <h3 style="margin-top: 0; margin-bottom: 6px; font-size: 1rem;">Targeted Record Investigation</h3>
             <p style="color: #64748B; font-size: 0.84rem; margin-top: 0; margin-bottom: 12px;">
                 Select a telemetry window to inspect multi-axis radar profiles, deviation waterfalls, and field troubleshooting guidance:
             </p>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    c_sel, c_jump = st.columns([2.5, 1])
-    available_ids = list(display_df["Record ID"]) if len(display_df) > 0 else list(results_df["Record ID"])
-    
-    with c_sel:
-        selected_record = st.selectbox(
-            "Select Record for Deep-Dive:",
-            options=available_ids,
-            index=0,
-            key="alert_triage_record_select",
+            """,
+            unsafe_allow_html=True,
         )
-        st.session_state["selected_record_id"] = selected_record
 
-    with c_jump:
-        st.markdown("<div style='height: 26px;'></div>", unsafe_allow_html=True)
-        if st.button("Investigate Record (Stage 06)", use_container_width=True, key="btn_jump_to_investigate"):
-            navigate_to("06 — Investigation & Export")
+        c_sel, c_jump = st.columns([2.5, 1])
+        available_ids = list(display_df["Record ID"]) if len(display_df) > 0 else list(results_df["Record ID"])
+        
+        with c_sel:
+            selected_record = st.selectbox(
+                "Select Record for Deep-Dive:",
+                options=available_ids,
+                index=0,
+                key="alert_triage_record_select",
+            )
+            st.session_state["selected_record_id"] = selected_record
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        with c_jump:
+            st.markdown("<div style='height: 26px;'></div>", unsafe_allow_html=True)
+            if st.button("Investigate Record (Stage 06) →", use_container_width=True, key="btn_jump_to_investigate"):
+                navigate_to("06 — Investigation & Export")

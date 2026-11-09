@@ -12,6 +12,7 @@ import streamlit as st
 from ..components.metric_cards import (
     render_hero_banner,
     render_metric_card,
+    render_html,
     navigate_to,
 )
 from src.feature_engineering import create_synthetic_demo_features, FEATURE_COLUMNS
@@ -165,9 +166,9 @@ def render(pipeline: Optional[Any] = None) -> None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Conversational AI Dataset Assistant
-    st.markdown(
-        """
-        <div class="telecom-card">
+    with st.container(border=True):
+        render_html(
+            """
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                 <h3 style="margin: 0; font-size: 1rem;">AI Telemetry Analyst — Dataset Query</h3>
                 <span style="font-size: 0.7rem; color: #0EA5E9; background: rgba(14, 165, 233, 0.1); padding: 2px 8px; border-radius: 4px; font-weight: 700;">
@@ -177,44 +178,40 @@ def render(pipeline: Optional[Any] = None) -> None:
             <p style="color: #64748B; font-size: 0.84rem; margin-top: 0; margin-bottom: 12px;">
                 Inspect coverage, error rate spikes, or queue buffer backlogs across the loaded batch:
             </p>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    chip_cols = st.columns(4)
-    suggested_q = None
-    with chip_cols[0]:
-        if st.button("Check Low RSRP Coverage", use_container_width=True, key="btn_chip_rsrp"):
-            suggested_q = "Which cells have low RSRP coverage?"
-    with chip_cols[1]:
-        if st.button("Check High BLER Errors", use_container_width=True, key="btn_chip_bler"):
-            suggested_q = "Are there any high BLER link error spikes?"
-    with chip_cols[2]:
-        if st.button("Inspect Buffer Congestion", use_container_width=True, key="btn_chip_buf"):
-            suggested_q = "Inspect queue buffer stalls and congestion"
-    with chip_cols[3]:
-        if st.button("Run Quick Anomaly Scan", use_container_width=True, key="btn_chip_anom"):
-            suggested_q = "What is the preliminary anomaly status?"
-
-    current_query = st.text_input(
-        "Enter question regarding this dataset:",
-        value=suggested_q if suggested_q else "Are there any high BLER link error spikes?",
-        key="ai_query_input",
-    )
-
-    if current_query:
-        ans = _handle_ai_query(working_df, current_query)
-        st.markdown(
-            f"""
-            <div style="background: #080C14; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
-                        border-radius: 6px; padding: 12px 14px; margin-top: 10px; font-size: 0.88rem; color: #E2E8F0;">
-                {ans}
-            </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        chip_cols = st.columns(4)
+        suggested_q = None
+        with chip_cols[0]:
+            if st.button("Check Low RSRP Coverage", use_container_width=True, key="btn_chip_rsrp"):
+                suggested_q = "Which cells have low RSRP coverage?"
+        with chip_cols[1]:
+            if st.button("Check High BLER Errors", use_container_width=True, key="btn_chip_bler"):
+                suggested_q = "Are there any high BLER link error spikes?"
+        with chip_cols[2]:
+            if st.button("Inspect Buffer Congestion", use_container_width=True, key="btn_chip_buf"):
+                suggested_q = "Inspect queue buffer stalls and congestion"
+        with chip_cols[3]:
+            if st.button("Run Quick Anomaly Scan", use_container_width=True, key="btn_chip_anom"):
+                suggested_q = "What is the preliminary anomaly status?"
+
+        current_query = st.text_input(
+            "Enter question regarding this dataset:",
+            value=suggested_q if suggested_q else "Are there any high BLER link error spikes?",
+            key="ai_query_input",
+        )
+
+        if current_query:
+            ans = _handle_ai_query(working_df, current_query)
+            render_html(
+                f"""
+                <div style="background: #080C14; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
+                            border-radius: 6px; padding: 12px 14px; margin-top: 10px; font-size: 0.88rem; color: #E2E8F0;">
+                    {ans}
+                </div>
+                """
+            )
 
     # Next Stage Button
     st.markdown("<br>", unsafe_allow_html=True)

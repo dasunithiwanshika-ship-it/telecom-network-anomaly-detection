@@ -6,13 +6,13 @@ and direct entry points to the 6-stage operational workflow.
 
 from typing import Any, Optional
 import streamlit as st
-from ..components.metric_cards import navigate_to
+from ..components.metric_cards import navigate_to, render_html
 from src.feature_engineering import create_synthetic_demo_features
 
 
 def render(pipeline: Optional[Any] = None) -> None:
     """Render the executive Welcome and Operator Login screen."""
-    st.markdown(
+    render_html(
         """
         <div style="background: linear-gradient(135deg, #09101F 0%, #0D1A2E 50%, #0A2234 100%);
                     border: 1px solid #1C2D47; border-left: 4px solid #0EA5E9;
@@ -44,14 +44,13 @@ def render(pipeline: Optional[Any] = None) -> None:
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     col_overview, col_login = st.columns([1.2, 1])
 
     with col_overview:
-        st.markdown(
+        render_html(
             """
             <div class="telecom-card" style="height: 100%; min-height: 380px; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
@@ -99,59 +98,56 @@ def render(pipeline: Optional[Any] = None) -> None:
                     <span style="color: #38BDF8;">3GPP TS 36.314 Spec</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
     with col_login:
-        st.markdown(
-            """
-            <div class="telecom-card">
+        with st.container(border=True):
+            st.markdown(
+                """
                 <div style="margin-bottom: 14px;">
                     <div style="font-weight: 700; font-size: 1.05rem; color: #F8FAFC;">NOC Operator Sign-In</div>
                     <div style="font-size: 0.76rem; color: #64748B;">Select an operational profile to enter the monitoring workspace:</div>
                 </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
 
-        operator_role = st.selectbox(
-            "Operator Profile:",
-            [
-                "Alex Chen — Principal NOC Performance Engineer",
-                "Sarah Lin — Senior AI Network Specialist",
-                "Marcus Vance — Field Operations Lead",
-                "Autonomous Evaluation Profile",
-            ],
-            index=0,
-            key="login_operator_role",
-        )
+            operator_role = st.selectbox(
+                "Operator Profile:",
+                [
+                    "Alex Chen — Principal NOC Performance Engineer",
+                    "Sarah Lin — Senior AI Network Specialist",
+                    "Marcus Vance — Field Operations Lead",
+                    "Autonomous Evaluation Profile",
+                ],
+                index=0,
+                key="login_operator_role",
+            )
 
-        user_name = st.text_input(
-            "Operator ID:",
-            value="noc-engineer-8491",
-            key="login_user_id",
-        )
+            user_name = st.text_input(
+                "Operator ID:",
+                value="noc-engineer-8491",
+                key="login_user_id",
+            )
 
-        st.caption("Authenticated through Telecom Single Sign-On (SSO).")
+            st.caption("Authenticated through Telecom Single Sign-On (SSO).")
 
-        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-        if st.button("Enter Network Overview (Stage 02) →", use_container_width=True, key="btn_login_enter"):
-            st.session_state["logged_in_user"] = user_name
-            navigate_to("02 — Network Overview")
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            if st.button("Enter Network Overview (Stage 02) →", use_container_width=True, key="btn_login_enter"):
+                st.session_state["logged_in_user"] = user_name
+                navigate_to("02 — Network Overview")
 
-        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
-        if st.button("Ingest Telemetry Data (Stage 03) →", use_container_width=True, key="btn_login_to_ingest"):
-            navigate_to("03 — Data Ingestion")
+            st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            if st.button("Ingest Telemetry Data (Stage 03) →", use_container_width=True, key="btn_login_to_ingest"):
+                navigate_to("03 — Data Ingestion")
 
-        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
-        if st.button("Run AI Detection on Field Sample (Stage 04) →", use_container_width=True, key="btn_login_quick_demo"):
-            demo_df = create_synthetic_demo_features(n_samples=25, random_state=42)
-            st.session_state["active_dataset_df"] = demo_df
-            st.session_state["active_dataset_name"] = "Standard Field Batch (25 Windows)"
-            navigate_to("04 — AI Detection")
-
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            if st.button("Run AI Detection on Field Sample (Stage 04) →", use_container_width=True, key="btn_login_quick_demo"):
+                demo_df = create_synthetic_demo_features(n_samples=25, random_state=42)
+                st.session_state["active_dataset_df"] = demo_df
+                st.session_state["active_dataset_name"] = "Standard Field Batch (25 Windows)"
+                navigate_to("04 — AI Detection")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -171,7 +167,7 @@ def render(pipeline: Optional[Any] = None) -> None:
     cols = st.columns(6)
     for c, (num, title, desc, target_nav) in zip(cols, steps):
         with c:
-            st.markdown(
+            render_html(
                 f"""
                 <div style="background: #0E1524; border: 1px solid #1A263D; border-radius: 6px; padding: 12px; height: 105px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
@@ -180,8 +176,7 @@ def render(pipeline: Optional[Any] = None) -> None:
                         <div style="font-size: 0.72rem; color: #64748B; margin-top: 4px; line-height: 1.25;">{desc}</div>
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
             if st.button(f"Open {num}", key=f"btn_step_nav_{num}", use_container_width=True):
                 navigate_to(target_nav)

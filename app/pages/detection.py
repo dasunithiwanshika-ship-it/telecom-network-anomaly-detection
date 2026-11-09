@@ -13,6 +13,7 @@ import streamlit as st
 from ..components.metric_cards import (
     render_hero_banner,
     render_metric_card,
+    render_html,
     navigate_to,
     get_feature_meta,
 )
@@ -132,14 +133,13 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
         selected_model_desc = model_options[chosen_idx][2]
         selected_model_family = model_options[chosen_idx][3]
 
-        st.markdown(
+        render_html(
             f"""
             <div style="background: #0E1524; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
                         border-radius: 6px; padding: 12px 14px; margin-top: 10px; font-size: 0.84rem; color: #94A3B8;">
                 <strong style="color: #F8FAFC;">Engine Architecture:</strong> {selected_model_desc}
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
     # 2. Alert Sensitivity & Threshold Calibration
@@ -196,26 +196,24 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
                 key="ml_threshold_slider",
             )
 
-            st.markdown(
+            render_html(
                 f"""
                 <div style="background: #080C14; border: 1px solid #162032; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #CBD5E1;">
                     <div>Cutoff: <strong style="color: #38BDF8;">tau = {threshold_val:.2f}</strong></div>
                     <div>Validation F1: <strong>0.934</strong> | Test Precision: <strong>99.2%</strong></div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-        st.markdown(
+        render_html(
             f"""
             <div style="background: #0B101B; border: 1px solid #1A263D; border-radius: 6px; padding: 12px;">
                 <div style="font-size: 0.68rem; color: #64748B; text-transform: uppercase;">Active Telemetry Target</div>
                 <div style="color: #F8FAFC; font-weight: 700; font-size: 0.92rem;">{active_name}</div>
                 <div style="color: #10B981; font-size: 0.78rem; margin-top: 2px;">● {len(active_df)} Cell Windows Loaded</div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
     st.markdown("<br>", unsafe_allow_html=True)

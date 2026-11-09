@@ -146,13 +146,14 @@ def apply_custom_theme():
             font-feature-settings: "tnum";
         }
 
-        /* Clean Architectural Cards */
-        .telecom-card {
-            background: #0E1524;
-            border: 1px solid #1A263D;
-            border-radius: 8px;
-            padding: 20px 22px;
-            margin-bottom: 18px;
+        /* Clean Architectural Cards & Streamlit Bordered Containers */
+        .telecom-card,
+        div[data-testid="stVerticalBlockBorderWrapper"] > div {
+            background: #0E1524 !important;
+            border: 1px solid #1A263D !important;
+            border-radius: 8px !important;
+            padding: 18px 20px !important;
+            margin-bottom: 14px;
         }
         .telecom-card h3 {
             color: #F8FAFC;

@@ -12,6 +12,7 @@ import streamlit as st
 from ..components.metric_cards import (
     render_hero_banner,
     render_metric_card,
+    render_html,
     navigate_to,
     get_feature_meta,
     TELECOM_KPI_METADATA,
@@ -158,7 +159,7 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
 
     # 1. Diagnostics Summary Header Card
     color_border = "#EF4444" if "Critical" in status_label else ("#F59E0B" if "High" in status_label else "#10B981")
-    st.markdown(
+    render_html(
         f"""
         <div style="background: #0E1524; border: 1px solid #1A263D; border-left: 4px solid {color_border};
                     border-radius: 6px; padding: 18px 22px; margin-bottom: 20px;">
@@ -185,8 +186,7 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
                 <strong>Root Cause Diagnosis:</strong> <span style="color: #EF4444; font-weight: 600;">{diag_title}</span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     # 2. Visual Deep-Dive: Radar Chart & Waterfall Deviations
@@ -214,7 +214,7 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
     col_check, col_copilot = st.columns([1.1, 1])
 
     with col_check:
-        st.markdown(
+        render_html(
             f"""
             <div class="telecom-card">
                 <h3 style="margin-bottom: 8px;">Recommended Field Operations Checklist</h3>
@@ -237,14 +237,13 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
                     If downlink spectrum utilization remains above 80%, trigger automated traffic steering to secondary carrier frequencies.
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
     with col_copilot:
-        st.markdown(
-            """
-            <div class="telecom-card">
+        with st.container(border=True):
+            render_html(
+                """
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <h3 style="margin: 0; font-size: 0.95rem;">NOC AI Diagnostic Copilot</h3>
                     <span style="font-size: 0.7rem; color: #10B981; font-weight: 700;">ACTIVE</span>
@@ -252,28 +251,25 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
                 <p style="color: #64748B; font-size: 0.82rem; margin-top: 0; margin-bottom: 10px;">
                     Select technical queries regarding resolving this specific cell anomaly:
                 </p>
-            """,
-            unsafe_allow_html=True,
-        )
+                """
+            )
 
-        preset_qs = [
-            "Can this issue be mitigated remotely via OSS without a tower climb?",
-            "How does this affect VoLTE voice calls vs data subscribers?",
-            "Which eNodeB RRC parameters should be calibrated first?",
-        ]
-        q_sel = st.selectbox("Inquiry Topics:", preset_qs, key="copilot_q_select")
-        q_ans = _answer_ai_copilot_question(q_sel, record_row, top_feature_col)
+            preset_qs = [
+                "Can this issue be mitigated remotely via OSS without a tower climb?",
+                "How does this affect VoLTE voice calls vs data subscribers?",
+                "Which eNodeB RRC parameters should be calibrated first?",
+            ]
+            q_sel = st.selectbox("Inquiry Topics:", preset_qs, key="copilot_q_select")
+            q_ans = _answer_ai_copilot_question(q_sel, record_row, top_feature_col)
 
-        st.markdown(
-            f"""
-            <div style="background: #080C14; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
-                        border-radius: 6px; padding: 12px; margin-top: 10px; font-size: 0.84rem; color: #E2E8F0; line-height: 1.45;">
-                {q_ans}
-            </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+            render_html(
+                f"""
+                <div style="background: #080C14; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
+                            border-radius: 6px; padding: 12px; margin-top: 10px; font-size: 0.84rem; color: #E2E8F0; line-height: 1.45;">
+                    {q_ans}
+                </div>
+                """
+            )
 
     st.markdown("<br>", unsafe_allow_html=True)
 

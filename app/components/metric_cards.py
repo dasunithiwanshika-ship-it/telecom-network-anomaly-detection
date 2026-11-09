@@ -152,17 +152,24 @@ def get_feature_meta(feature_name: str) -> Dict[str, str]:
     }
 
 
+import textwrap
+
+
+def render_html(html_str: str) -> None:
+    """Renders HTML safely in Streamlit without CommonMark 4-space code-block bugs."""
+    st.markdown(textwrap.dedent(html_str).strip(), unsafe_allow_html=True)
+
+
 def render_hero_banner(title: str, subtitle: str, badge: str = "TELECOM AI") -> None:
     """Renders a clean, executive hero banner without emoji clutter."""
-    st.markdown(
+    render_html(
         f"""
         <div class="telecom-hero-banner">
             <div class="telecom-hero-badge">{badge}</div>
             <h1>{title}</h1>
             <p>{subtitle}</p>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
@@ -173,15 +180,15 @@ def render_metric_card(
     color: str = "#0EA5E9",
 ) -> None:
     """Renders a clean, high-contrast metric card."""
-    st.markdown(
+    subtext_html = f"<div class='telecom-metric-subtext'>{subtext}</div>" if subtext else ""
+    render_html(
         f"""
         <div class="telecom-metric-card">
             <div class="telecom-metric-label">{label}</div>
             <div class="telecom-metric-value" style="color: {color};">{value}</div>
-            {"<div class='telecom-metric-subtext'>" + subtext + "</div>" if subtext else ""}
+            {subtext_html}
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
@@ -194,7 +201,7 @@ def render_noc_status_strip(
     open_incidents: int = 3,
 ) -> None:
     """Renders the top NOC status ribbon with subtle geometric dot indicators."""
-    st.markdown(
+    render_html(
         f"""
         <div class="noc-pill-strip">
             <div class="noc-status-pill">
@@ -240,15 +247,13 @@ def render_noc_status_strip(
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
 def navigate_to(page_name: str) -> None:
-    """Safely updates session navigation and triggers a rerun."""
+    """Safely updates session navigation via pending_nav and triggers a clean rerun."""
     st.session_state["pending_nav"] = page_name
-    st.session_state["nav_page"] = page_name
     st.rerun()
 
 
