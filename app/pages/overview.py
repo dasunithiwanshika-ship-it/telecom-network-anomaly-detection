@@ -1,19 +1,135 @@
 """
-Page 1: Home & Network Overview.
-Clean, uncluttered overview with a direct action to start anomaly detection.
+Page 02: NOC Network Overview & Operational Intelligence.
+Refined enterprise interface featuring radial health gauges, status ribbon,
+predictive risk forecasts, and an interactive Radio Access Network topology inspector.
 """
 
 from typing import Optional, Tuple, Any
+from datetime import datetime
 import pandas as pd
 import streamlit as st
 
 from ..components.metric_cards import (
     render_hero_banner,
-    render_metric_card,
+    render_noc_status_strip,
+    render_html,
     navigate_to,
 )
-from ..components.charts import create_donut_class_distribution
+from ..components.charts import (
+    create_radial_gauge,
+    create_kpi_trend_splines,
+    create_topology_network_graph,
+    create_donut_class_distribution,
+)
 from src.data_loader import load_processed_features
+
+
+NODE_TELEMETRY_DATA = {
+    "cell-macro-02": {
+        "title": "cell-macro-02 (eNodeB Sector 2)",
+        "ip": "10.14.2.12",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-North",
+        "prb": "78%",
+        "bler": "12.4% (Threshold: 8.0%)",
+        "rsrp": "-104 dBm",
+        "snr": "8.5 dB",
+        "status": "DEGRADED",
+        "status_class": "pill-high",
+        "note": "High downlink block error rate detected. Review link adaptation MCS and MIMO channel fading.",
+    },
+    "cell-macro-04": {
+        "title": "cell-macro-04 (eNodeB Sector 3)",
+        "ip": "10.14.2.14",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-South",
+        "prb": "94%",
+        "bler": "4.2%",
+        "rsrp": "-96 dBm",
+        "snr": "11.2 dB",
+        "status": "CRITICAL",
+        "status_class": "pill-critical",
+        "note": "Uplink queue buffer backlog stall. PRB capacity near 100% saturation. Immediate load balancing required.",
+    },
+    "cell-macro-01": {
+        "title": "cell-macro-01 (eNodeB Sector 1)",
+        "ip": "10.14.2.11",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-North",
+        "prb": "42%",
+        "bler": "1.1%",
+        "rsrp": "-88 dBm",
+        "snr": "18.4 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "cell-small-03": {
+        "title": "cell-small-03 (gNodeB Hotspot)",
+        "ip": "10.14.3.15",
+        "role": "gNodeB Small Cell",
+        "switch": "Agg-Switch-North",
+        "prb": "35%",
+        "bler": "0.9%",
+        "rsrp": "-82 dBm",
+        "snr": "21.0 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "cell-small-05": {
+        "title": "cell-small-05 (gNodeB Micro Cell)",
+        "ip": "10.14.3.17",
+        "role": "gNodeB Small Cell",
+        "switch": "Agg-Switch-South",
+        "prb": "18%",
+        "bler": "0.6%",
+        "rsrp": "-79 dBm",
+        "snr": "23.5 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "cell-macro-06": {
+        "title": "cell-macro-06 (eNodeB Sector 4)",
+        "ip": "10.14.2.16",
+        "role": "eNodeB Macro Sector",
+        "switch": "Agg-Switch-South",
+        "prb": "45%",
+        "bler": "1.4%",
+        "rsrp": "-91 dBm",
+        "snr": "16.8 dB",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Operating nominally within baseline statistical boundaries.",
+    },
+    "agg-switch-01": {
+        "title": "Agg-Switch-North (Backhaul Aggregation)",
+        "ip": "10.14.1.2",
+        "role": "Aggregation Switch",
+        "switch": "Core UPF",
+        "prb": "28% BW",
+        "bler": "0.0%",
+        "rsrp": "N/A",
+        "snr": "N/A",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "10 Gbps optical fiber backhaul link nominal.",
+    },
+    "core-upf-01": {
+        "title": "Core UPF (5G User Plane Function)",
+        "ip": "10.14.0.1",
+        "role": "5G Core Gateway",
+        "switch": "Edge Fabric",
+        "prb": "31% CPU",
+        "bler": "0.0%",
+        "rsrp": "N/A",
+        "snr": "N/A",
+        "status": "OPTIMAL",
+        "status_class": "pill-normal",
+        "note": "Core data plane latency 2.1ms with zero packet drops.",
+    },
+}
 
 
 @st.cache_data
@@ -25,78 +141,186 @@ def _get_baseline_dataset():
 
 
 def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmark_tables: Any = None):
-    """Render the clean Home & Overview page."""
-    render_hero_banner(
-        title="Telecom AI Network Monitor",
-        subtitle="Automatically detect abnormal cellular KPI behavior, identify which network metric caused the issue, and export reports.",
-        badge="WELCOME",
+    """Render the Royal Violet NOC Overview screen."""
+    now_str = datetime.now().strftime("%I:%M:%S %p")
+    render_html(
+        f"""
+        <div class="noc-topbar">
+            <div>
+                <span style="font-size: 0.7rem; font-weight: 700; color: #D8B4FE; letter-spacing: 1px; text-transform: uppercase;">
+                    OPERATIONAL INTELLIGENCE ENGINE
+                </span>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #F7F7F8; letter-spacing: -0.02em; margin-top: 2px;">
+                    NOC Overview
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="background: rgba(69, 181, 88, 0.12); border: 1px solid rgba(69, 181, 88, 0.3); border-radius: 999px; padding: 5px 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #45B558; font-size: 0.7rem;">●</span>
+                    <span style="font-size: 0.74rem; font-weight: 700; color: #45B558;">LIVE TELEMETRY {now_str}</span>
+                </div>
+            </div>
+        </div>
+        """
     )
 
-    # Top Quick-Action Bar
-    c_welcome, c_btn = st.columns([2.2, 1])
-    with c_welcome:
-        st.markdown(
-            "**How it works:** Upload a KPI CSV file (or use the built-in sample data), click **Run AI Detection**, and click any flagged alert to see why it was triggered."
+    # 1. Top Status Ribbon
+    render_noc_status_strip(
+        cells_up=30,
+        cells_down=0,
+        degraded=2,
+        active_alerts=4,
+        critical_alerts=2,
+        open_incidents=3,
+    )
+
+    # 2. Four Radial Gauges
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    g1, g2, g3, g4 = st.columns(4)
+
+    with g1:
+        fig_g1 = create_radial_gauge(100.0, "NETWORK HEALTH", color="#45B558")
+        st.plotly_chart(fig_g1, use_container_width=True)
+
+    with g2:
+        fig_g2 = create_radial_gauge(66.0, "PRB SPECTRUM UTILIZATION", color="#A020FF")
+        st.plotly_chart(fig_g2, use_container_width=True)
+
+    with g3:
+        fig_g3 = create_radial_gauge(55.0, "BUFFER & QUEUE LOAD", color="#F03B2A")
+        st.plotly_chart(fig_g3, use_container_width=True)
+
+    with g4:
+        fig_g4 = create_radial_gauge(21.0, "ANOMALY RISK INDEX", color="#D8B4FE")
+        st.plotly_chart(fig_g4, use_container_width=True)
+
+    # 3. System Forecast Alert Banner
+    col_fc_text, col_fc_btn = st.columns([3, 1])
+    with col_fc_text:
+        render_html(
+            """
+            <div class="noc-forecast-banner">
+                <div>
+                    <strong style="color: #F7F7F8; font-size: 0.92rem;">SYSTEM FORECAST &amp; PREDICTIVE RISK:</strong>
+                    <div style="color: #8B8988; font-size: 0.84rem; margin-top: 2px;">
+                        Infrastructure reliability is <span style="color: #F03B2A; font-weight: 700;">21.0% AT RISK</span>.
+                        4 alerts and 3 incidents are rising in sectors with elevated Downlink BLER.
+                    </div>
+                </div>
+            </div>
+            """
         )
-    with c_btn:
-        if st.button("⚡ Start Anomaly Detection →", use_container_width=True, key="btn_home_start"):
-            navigate_to("⚡ Run Detection")
+    with col_fc_btn:
+        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+        if st.button("View AI Predictions", use_container_width=True, key="btn_fc_predictions"):
+            navigate_to("05 — Alert Management")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if dataset_tuple is not None:
-        X, y = dataset_tuple
-    else:
-        X, y = _get_baseline_dataset()
+    # 4. Interactive RAN Topology & Node Inspector
+    st.markdown("### Radio Access Network Topology & Node Diagnostics")
+    st.caption("Inspect live cell towers, aggregation switches, and core gateway hierarchy:")
 
-    total_records = len(X) if X is not None else 32000
-    normal_records = int((y == 0).sum()) if y is not None else 30765
-    anomaly_records = int((y == 1).sum()) if y is not None else 1235
+    col_topo, col_node = st.columns([1.3, 1])
 
-    # 4 Clean Summary Metric Cards
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        render_metric_card("Network Windows", f"{total_records:,}", "Baseline dataset size", "#38BDF8")
-    with c2:
-        render_metric_card("Normal Operation", f"{normal_records:,}", "96.1% healthy traffic", "#10B981")
-    with c3:
-        render_metric_card("Network Anomalies", f"{anomaly_records:,}", "3.9% fault-risk events", "#EF4444")
-    with c4:
-        render_metric_card("AI Precision", "99.2%", "Recommended RF model", "#14B8A6")
+    # Node selection control
+    node_keys = list(NODE_TELEMETRY_DATA.keys())
+    node_labels = [NODE_TELEMETRY_DATA[k]["title"] for k in node_keys]
+
+    with col_node:
+        with st.container(border=True):
+            render_html(
+                """
+                <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1rem;">Node Telemetry Inspector</h3>
+                """
+            )
+
+            chosen_node_idx = st.selectbox(
+                "Select Network Node to Inspect:",
+                range(len(node_keys)),
+                format_func=lambda i: node_labels[i],
+                index=0,  # Default to cell-macro-02 (degraded)
+                key="topo_node_selector",
+            )
+            selected_key = node_keys[chosen_node_idx]
+            node_info = NODE_TELEMETRY_DATA[selected_key]
+
+            render_html(
+                f"""
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 0.92rem; font-weight: 700; color: #F7F7F8;">{node_info['title']}</span>
+                        <span class="{node_info['status_class']}">{node_info['status']}</span>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #F7F7F8; margin-bottom: 12px;">
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">Node Role / Type</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['role']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">IP Address</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #D8B4FE;">{node_info['ip']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">Uplink Gateway</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['switch']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">PRB Spectrum Load</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['prb']}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">Downlink BLER</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: {'#F03B2A' if 'DEGRADED' in node_info['status'] else '#45B558'};">{node_info['bler']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 0; color: #8B8988;">Radio RSRP / SNR</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['rsrp']} / {node_info['snr']}</td>
+                        </tr>
+                    </table>
+
+                    <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.22); border-radius: 8px; padding: 8px 10px; font-size: 0.76rem; color: #8B8988; line-height: 1.4; margin-bottom: 12px;">
+                        {node_info['note']}
+                    </div>
+                </div>
+                """
+            )
+
+            if st.button(f"Triage Alarms for {selected_key} →", use_container_width=True, key="btn_triage_selected_node"):
+                navigate_to("05 — Alert Management")
+
+    with col_topo:
+        topo_fig = create_topology_network_graph(selected_node=selected_key)
+        st.plotly_chart(topo_fig, use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Clean 2-Column Visual Section
-    left_col, right_col = st.columns([1, 1.2])
+    # 5. 24-Hour Telemetry Dynamics & Baseline Distribution
+    c_spline, c_donut = st.columns([1.5, 1])
 
-    with left_col:
-        st.markdown("#### 📊 Network Health Breakdown")
-        donut_fig = create_donut_class_distribution(normal_records, anomaly_records)
+    with c_spline:
+        spline_fig = create_kpi_trend_splines()
+        st.plotly_chart(spline_fig, use_container_width=True)
+
+    with c_donut:
+        st.markdown(
+            """
+            <div style="font-size: 0.86rem; font-weight: 600; color: #F8FAFC; margin-bottom: 4px;">
+                Trained Baseline Distribution (N=32,000)
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        donut_fig = create_donut_class_distribution(30765, 1235)
         st.plotly_chart(donut_fig, use_container_width=True)
 
-    with right_col:
-        st.markdown("#### 📡 Monitored Network Signals (16 KPIs)")
-        summary_table = pd.DataFrame([
-            {
-                "Signal Group": "Radio Signal Quality",
-                "KPIs Monitored": "RSRP, Uplink SNR",
-                "What It Detects": "Weak tower coverage or radio interference",
-            },
-            {
-                "Signal Group": "Transmission Error Rates",
-                "KPIs Monitored": "Uplink & Downlink BLER",
-                "What It Detects": "Data block errors and packet drops",
-            },
-            {
-                "Signal Group": "Channel Allocation",
-                "KPIs Monitored": "PRB Allocation, Utilization, MCS",
-                "What It Detects": "Channel starvation or cell overload",
-            },
-            {
-                "Signal Group": "Traffic & Device Buffer",
-                "KPIs Monitored": "TX/RX Bytes, Packets, UL Buffer",
-                "What It Detects": "Queue congestion and throughput stalls",
-            },
-        ])
-        st.dataframe(summary_table, use_container_width=True, hide_index=True)
-        st.caption("ℹ️ Built using the public `AliMaatouk/TelecomTS` cellular KPI dataset (independent research prototype).")
+    # Bottom Actions
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    c_btn1, c_btn2 = st.columns(2)
+    with c_btn1:
+        if st.button("Ingest Network Data (Stage 03) →", use_container_width=True, key="btn_ov_ingest"):
+            navigate_to("03 — Data Ingestion")
+    with c_btn2:
+        if st.button("Configure AI Detection (Stage 04) →", use_container_width=True, key="btn_ov_detect"):
+            navigate_to("04 — AI Detection")
