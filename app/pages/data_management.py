@@ -147,13 +147,13 @@ def render(pipeline: Optional[Any] = None) -> None:
     schema_status = "100% Validated" if valid_cols == 64 else f"{valid_cols}/64 Cols"
 
     with m1:
-        render_metric_card("Telemetry Windows", f"{len(working_df):,}", "Active batch length", "#0EA5E9")
+        render_metric_card("Telemetry Windows", f"{len(working_df):,}", "Active batch length", "#D8B4FE")
     with m2:
-        render_metric_card("Feature Columns", f"{working_df.shape[1]}", "64 Expected KPI moments", "#38BDF8")
+        render_metric_card("Feature Columns", f"{working_df.shape[1]}", "64 Expected KPI moments", "#A020FF")
     with m3:
-        render_metric_card("Missing Values", f"{missing_pct:.1f}%", "Complete data integrity", "#10B981")
+        render_metric_card("Missing Values", f"{missing_pct:.1f}%", "Complete data integrity", "#45B558")
     with m4:
-        render_metric_card("Schema Status", schema_status, "3GPP RAN specification compliant", "#10B981" if valid_cols == 64 else "#F59E0B")
+        render_metric_card("Schema Status", schema_status, "3GPP RAN specification compliant", "#45B558" if valid_cols == 64 else "#F59E0B")
 
     # Data Preview
     st.markdown("#### Telemetry Data Preview (Sample Records)")
@@ -171,11 +171,11 @@ def render(pipeline: Optional[Any] = None) -> None:
             """
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                 <h3 style="margin: 0; font-size: 1rem;">AI Telemetry Analyst — Dataset Query</h3>
-                <span style="font-size: 0.7rem; color: #0EA5E9; background: rgba(14, 165, 233, 0.1); padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                <span style="font-size: 0.7rem; color: #D8B4FE; background: rgba(147, 18, 255, 0.16); border: 1px solid rgba(147, 18, 255, 0.35); padding: 2px 10px; border-radius: 999px; font-weight: 700;">
                     NATURAL LANGUAGE INTERFACE
                 </span>
             </div>
-            <p style="color: #64748B; font-size: 0.84rem; margin-top: 0; margin-bottom: 12px;">
+            <p style="color: #8B8988; font-size: 0.84rem; margin-top: 0; margin-bottom: 12px;">
                 Inspect coverage, error rate spikes, or queue buffer backlogs across the loaded batch:
             </p>
             """
@@ -206,8 +206,8 @@ def render(pipeline: Optional[Any] = None) -> None:
             ans = _handle_ai_query(working_df, current_query)
             render_html(
                 f"""
-                <div style="background: #080C14; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
-                            border-radius: 6px; padding: 12px 14px; margin-top: 10px; font-size: 0.88rem; color: #E2E8F0;">
+                <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.25); border-left: 3px solid #A020FF;
+                            border-radius: 8px; padding: 12px 14px; margin-top: 10px; font-size: 0.88rem; color: #F7F7F8;">
                     {ans}
                 </div>
                 """

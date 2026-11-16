@@ -156,8 +156,12 @@ import textwrap
 
 
 def render_html(html_str: str) -> None:
-    """Renders HTML safely in Streamlit without CommonMark 4-space code-block bugs."""
-    st.markdown(textwrap.dedent(html_str).strip(), unsafe_allow_html=True)
+    """Renders HTML directly using st.html (bypasses Markdown parser completely)."""
+    cleaned = "\n".join(line.strip() for line in textwrap.dedent(html_str).splitlines() if line.strip())
+    if hasattr(st, "html"):
+        st.html(cleaned)
+    else:
+        st.markdown(cleaned, unsafe_allow_html=True)
 
 
 def render_hero_banner(title: str, subtitle: str, badge: str = "TELECOM AI") -> None:
@@ -177,9 +181,9 @@ def render_metric_card(
     label: str,
     value: str,
     subtext: str = "",
-    color: str = "#0EA5E9",
+    color: str = "#D8B4FE",
 ) -> None:
-    """Renders a clean, high-contrast metric card."""
+    """Renders a clean, high-contrast Royal Violet metric card."""
     subtext_html = f"<div class='telecom-metric-subtext'>{subtext}</div>" if subtext else ""
     render_html(
         f"""
@@ -200,7 +204,7 @@ def render_noc_status_strip(
     critical_alerts: int = 2,
     open_incidents: int = 3,
 ) -> None:
-    """Renders the top NOC status ribbon with subtle geometric dot indicators."""
+    """Renders the top NOC status ribbon with Royal Violet & geometric dot indicators."""
     render_html(
         f"""
         <div class="noc-pill-strip">
@@ -208,21 +212,21 @@ def render_noc_status_strip(
                 <span class="status-dot dot-green"></span>
                 <div>
                     <div class="noc-pill-label">Devices Online</div>
-                    <div class="noc-pill-value" style="color: #10B981;">{cells_up} <span style="font-size: 0.8rem; color: #64748B;">/30</span></div>
+                    <div class="noc-pill-value" style="color: #45B558;">{cells_up} <span style="font-size: 0.8rem; color: #8B8988;">/30</span></div>
                 </div>
             </div>
             <div class="noc-status-pill">
                 <span class="status-dot dot-red"></span>
                 <div>
                     <div class="noc-pill-label">Devices Offline</div>
-                    <div class="noc-pill-value" style="color: #64748B;">{cells_down} <span style="font-size: 0.8rem; color: #64748B;">/30</span></div>
+                    <div class="noc-pill-value" style="color: #8B8988;">{cells_down} <span style="font-size: 0.8rem; color: #8B8988;">/30</span></div>
                 </div>
             </div>
             <div class="noc-status-pill">
                 <span class="status-dot dot-amber"></span>
                 <div>
                     <div class="noc-pill-label">Degraded</div>
-                    <div class="noc-pill-value" style="color: #F59E0B;">{degraded} <span style="font-size: 0.8rem; color: #64748B;">/30</span></div>
+                    <div class="noc-pill-value" style="color: #F59E0B;">{degraded} <span style="font-size: 0.8rem; color: #8B8988;">/30</span></div>
                 </div>
             </div>
             <div class="noc-status-pill">
@@ -236,14 +240,14 @@ def render_noc_status_strip(
                 <span class="status-dot dot-red"></span>
                 <div>
                     <div class="noc-pill-label">Critical Alerts</div>
-                    <div class="noc-pill-value" style="color: #EF4444;">{critical_alerts}</div>
+                    <div class="noc-pill-value" style="color: #F03B2A;">{critical_alerts}</div>
                 </div>
             </div>
             <div class="noc-status-pill">
                 <span class="status-dot dot-blue"></span>
                 <div>
                     <div class="noc-pill-label">Open Incidents</div>
-                    <div class="noc-pill-value" style="color: #0EA5E9;">{open_incidents}</div>
+                    <div class="noc-pill-value" style="color: #B76EFF;">{open_incidents}</div>
                 </div>
             </div>
         </div>

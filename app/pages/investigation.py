@@ -158,32 +158,32 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
     st.markdown("<br>", unsafe_allow_html=True)
 
     # 1. Diagnostics Summary Header Card
-    color_border = "#EF4444" if "Critical" in status_label else ("#F59E0B" if "High" in status_label else "#10B981")
+    color_border = "#F03B2A" if "Critical" in status_label else ("#F59E0B" if "High" in status_label else "#45B558")
     render_html(
         f"""
-        <div style="background: #0E1524; border: 1px solid #1A263D; border-left: 4px solid {color_border};
-                    border-radius: 6px; padding: 18px 22px; margin-bottom: 20px;">
+        <div style="background: rgba(11, 9, 18, 0.92); border: 1px solid rgba(147, 18, 255, 0.25); border-left: 4px solid {color_border};
+                    border-radius: 12px; padding: 18px 22px; margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 <div>
-                    <span style="font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase;">
+                    <span style="font-size: 0.7rem; font-weight: 700; color: #8B8988; text-transform: uppercase;">
                         TARGET CELL TELEMETRY ID:
                     </span>
-                    <span style="font-size: 1.2rem; font-weight: 700; color: #F8FAFC; margin-left: 6px;">
+                    <span style="font-size: 1.2rem; font-weight: 700; color: #F7F7F8; margin-left: 6px;">
                         {selected_id}
                     </span>
                 </div>
                 <div>
-                    <span style="font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 4px;
-                                 background: rgba(239, 68, 68, 0.12); color: {color_border}; border: 1px solid {color_border};">
+                    <span style="font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+                                 background: rgba(240, 59, 42, 0.14); color: {color_border}; border: 1px solid {color_border};">
                         {status_label.upper()}
                     </span>
-                    <span style="font-size: 0.82rem; color: #94A3B8; margin-left: 10px;">
-                        Confidence Score: <strong style="color: #38BDF8;">{score_val:.4f}</strong>
+                    <span style="font-size: 0.82rem; color: #8B8988; margin-left: 10px;">
+                        Confidence Score: <strong style="color: #D8B4FE;">{score_val:.4f}</strong>
                     </span>
                 </div>
             </div>
-            <div style="margin-top: 10px; font-size: 0.92rem; color: #E2E8F0;">
-                <strong>Root Cause Diagnosis:</strong> <span style="color: #EF4444; font-weight: 600;">{diag_title}</span>
+            <div style="margin-top: 10px; font-size: 0.92rem; color: #F7F7F8;">
+                <strong>Root Cause Diagnosis:</strong> <span style="color: #F03B2A; font-weight: 600;">{diag_title}</span>
             </div>
         </div>
         """
@@ -218,22 +218,22 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
             f"""
             <div class="telecom-card">
                 <h3 style="margin-bottom: 8px;">Recommended Field Operations Checklist</h3>
-                <p style="color: #64748B; font-size: 0.82rem; margin-top: 0; margin-bottom: 12px;">
+                <p style="color: #8B8988; font-size: 0.82rem; margin-top: 0; margin-bottom: 12px;">
                     Standard operational procedures for NOC operators and site technicians:
                 </p>
                 
-                <div style="background: #080C14; border: 1px solid #1A263D; border-radius: 6px; padding: 12px; margin-bottom: 10px; font-size: 0.84rem; color: #CBD5E1;">
-                    <div style="font-weight: 700; color: #0EA5E9; margin-bottom: 4px;">1. Primary Root-Cause Attribution</div>
+                <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.22); border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 0.84rem; color: #F7F7F8;">
+                    <div style="font-weight: 700; color: #D8B4FE; margin-bottom: 4px;">1. Primary Root-Cause Attribution</div>
                     {diag_action}
                 </div>
                 
-                <div style="background: #080C14; border: 1px solid #1A263D; border-radius: 6px; padding: 12px; margin-bottom: 10px; font-size: 0.84rem; color: #CBD5E1;">
-                    <div style="font-weight: 700; color: #38BDF8; margin-bottom: 4px;">2. MAC &amp; Physical Layer Verification</div>
+                <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.22); border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 0.84rem; color: #F7F7F8;">
+                    <div style="font-weight: 700; color: #A020FF; margin-bottom: 4px;">2. MAC &amp; Physical Layer Verification</div>
                     Cross-examine PDCCH aggregation levels and evaluate multi-user scheduling fairness to eliminate grant starvation.
                 </div>
                 
-                <div style="background: #080C14; border: 1px solid #1A263D; border-radius: 6px; padding: 12px; font-size: 0.84rem; color: #CBD5E1;">
-                    <div style="font-weight: 700; color: #F59E0B; margin-bottom: 4px;">3. Spectrum Load Balancing</div>
+                <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.22); border-radius: 10px; padding: 12px; font-size: 0.84rem; color: #F7F7F8;">
+                    <div style="font-weight: 700; color: #45B558; margin-bottom: 4px;">3. Spectrum Load Balancing</div>
                     If downlink spectrum utilization remains above 80%, trigger automated traffic steering to secondary carrier frequencies.
                 </div>
             </div>
@@ -246,9 +246,9 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
                 """
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <h3 style="margin: 0; font-size: 0.95rem;">NOC AI Diagnostic Copilot</h3>
-                    <span style="font-size: 0.7rem; color: #10B981; font-weight: 700;">ACTIVE</span>
+                    <span style="font-size: 0.7rem; color: #45B558; font-weight: 700;">ACTIVE</span>
                 </div>
-                <p style="color: #64748B; font-size: 0.82rem; margin-top: 0; margin-bottom: 10px;">
+                <p style="color: #8B8988; font-size: 0.82rem; margin-top: 0; margin-bottom: 10px;">
                     Select technical queries regarding resolving this specific cell anomaly:
                 </p>
                 """
@@ -264,8 +264,8 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
 
             render_html(
                 f"""
-                <div style="background: #080C14; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
-                            border-radius: 6px; padding: 12px; margin-top: 10px; font-size: 0.84rem; color: #E2E8F0; line-height: 1.45;">
+                <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.25); border-left: 3px solid #A020FF;
+                            border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 0.84rem; color: #F7F7F8; line-height: 1.45;">
                     {q_ans}
                 </div>
                 """

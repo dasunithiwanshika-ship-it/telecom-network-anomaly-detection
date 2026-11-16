@@ -11,6 +11,7 @@ import streamlit as st
 from ..components.metric_cards import (
     render_hero_banner,
     render_metric_card,
+    render_html,
     navigate_to,
 )
 from ..components.charts import (
@@ -34,26 +35,25 @@ def _generate_default_scan_results():
 
 def render(pipeline: Optional[Any] = None, dataset_tuple: Optional[Tuple] = None, benchmark_tables: Any = None):
     """Render the Alert Management and Anomaly Viewing screen."""
-    st.markdown(
+    render_html(
         """
         <div class="noc-topbar">
             <div>
-                <span style="background: rgba(239, 68, 68, 0.1); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.25);
-                             font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                <span style="background: rgba(240, 59, 42, 0.14); color: #F03B2A; border: 1px solid rgba(240, 59, 42, 0.35);
+                             font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 999px; text-transform: uppercase;">
                     05 — ALERT MANAGEMENT CONSOLE
                 </span>
-                <div style="font-size: 1.5rem; font-weight: 700; color: #F8FAFC; letter-spacing: -0.02em; margin-top: 4px;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #F7F7F8; letter-spacing: -0.02em; margin-top: 6px;">
                     Real-Time Incident Triage
                 </div>
             </div>
             <div style="display: flex; gap: 10px;">
-                <span style="background: #0E1524; border: 1px solid #1A263D; color: #64748B; padding: 5px 12px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">
+                <span style="background: rgba(11, 9, 18, 0.9); border: 1px solid rgba(147, 18, 255, 0.25); color: #D8B4FE; padding: 5px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600;">
                     Telemetry Refresh: Active
                 </span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     results_df: Optional[pd.DataFrame] = st.session_state.get("last_results")
@@ -72,13 +72,13 @@ def render(pipeline: Optional[Any] = None, dataset_tuple: Optional[Tuple] = None
     # 1. Summary Ribbon
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        render_metric_card("Scanned Windows", f"{total_records}", "Active observation batch", "#38BDF8")
+        render_metric_card("Scanned Windows", f"{total_records}", "Active observation batch", "#D8B4FE")
     with c2:
-        render_metric_card("Nominal Traffic", f"{normal_count}", f"{(normal_count/total_records)*100:.1f}% within baseline", "#10B981")
+        render_metric_card("Nominal Traffic", f"{normal_count}", f"{(normal_count/total_records)*100:.1f}% within baseline", "#45B558")
     with c3:
-        render_metric_card("Flagged Anomalies", f"{anom_count}", f"{(anom_count/total_records)*100:.1f}% incident rate", "#EF4444")
+        render_metric_card("Flagged Anomalies", f"{anom_count}", f"{(anom_count/total_records)*100:.1f}% incident rate", "#F03B2A")
     with c4:
-        render_metric_card("High & Critical Priority", f"{crit_count + high_count}", "Immediate engineer triage required", "#F59E0B")
+        render_metric_card("High & Critical Priority", f"{crit_count + high_count}", "Immediate engineer triage required", "#A020FF")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -144,14 +144,13 @@ def render(pipeline: Optional[Any] = None, dataset_tuple: Optional[Tuple] = None
 
     # 4. Target Record Selection
     with st.container(border=True):
-        st.markdown(
+        render_html(
             """
             <h3 style="margin-top: 0; margin-bottom: 6px; font-size: 1rem;">Targeted Record Investigation</h3>
-            <p style="color: #64748B; font-size: 0.84rem; margin-top: 0; margin-bottom: 12px;">
+            <p style="color: #8B8988; font-size: 0.84rem; margin-top: 0; margin-bottom: 12px;">
                 Select a telemetry window to inspect multi-axis radar profiles, deviation waterfalls, and field troubleshooting guidance:
             </p>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
         c_sel, c_jump = st.columns([2.5, 1])

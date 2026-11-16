@@ -141,23 +141,23 @@ def _get_baseline_dataset():
 
 
 def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmark_tables: Any = None):
-    """Render the executive NOC Overview screen."""
+    """Render the Royal Violet NOC Overview screen."""
     now_str = datetime.now().strftime("%I:%M:%S %p")
     render_html(
         f"""
         <div class="noc-topbar">
             <div>
-                <span style="font-size: 0.7rem; font-weight: 700; color: #38BDF8; letter-spacing: 1px; text-transform: uppercase;">
+                <span style="font-size: 0.7rem; font-weight: 700; color: #D8B4FE; letter-spacing: 1px; text-transform: uppercase;">
                     OPERATIONAL INTELLIGENCE ENGINE
                 </span>
-                <div style="font-size: 1.5rem; font-weight: 700; color: #F8FAFC; letter-spacing: -0.02em; margin-top: 2px;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #F7F7F8; letter-spacing: -0.02em; margin-top: 2px;">
                     NOC Overview
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 4px; padding: 5px 12px; display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #10B981; font-size: 0.7rem;">●</span>
-                    <span style="font-size: 0.74rem; font-weight: 700; color: #10B981;">LIVE TELEMETRY {now_str}</span>
+                <div style="background: rgba(69, 181, 88, 0.12); border: 1px solid rgba(69, 181, 88, 0.3); border-radius: 999px; padding: 5px 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #45B558; font-size: 0.7rem;">●</span>
+                    <span style="font-size: 0.74rem; font-weight: 700; color: #45B558;">LIVE TELEMETRY {now_str}</span>
                 </div>
             </div>
         </div>
@@ -179,19 +179,19 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
     g1, g2, g3, g4 = st.columns(4)
 
     with g1:
-        fig_g1 = create_radial_gauge(100.0, "NETWORK HEALTH", color="#10B981")
+        fig_g1 = create_radial_gauge(100.0, "NETWORK HEALTH", color="#45B558")
         st.plotly_chart(fig_g1, use_container_width=True)
 
     with g2:
-        fig_g2 = create_radial_gauge(66.0, "PRB SPECTRUM UTILIZATION", color="#F59E0B")
+        fig_g2 = create_radial_gauge(66.0, "PRB SPECTRUM UTILIZATION", color="#A020FF")
         st.plotly_chart(fig_g2, use_container_width=True)
 
     with g3:
-        fig_g3 = create_radial_gauge(55.0, "BUFFER & QUEUE LOAD", color="#EF4444")
+        fig_g3 = create_radial_gauge(55.0, "BUFFER & QUEUE LOAD", color="#F03B2A")
         st.plotly_chart(fig_g3, use_container_width=True)
 
     with g4:
-        fig_g4 = create_radial_gauge(21.0, "ANOMALY RISK INDEX", color="#0EA5E9")
+        fig_g4 = create_radial_gauge(21.0, "ANOMALY RISK INDEX", color="#D8B4FE")
         st.plotly_chart(fig_g4, use_container_width=True)
 
     # 3. System Forecast Alert Banner
@@ -201,9 +201,9 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
             """
             <div class="noc-forecast-banner">
                 <div>
-                    <strong style="color: #F8FAFC; font-size: 0.92rem;">SYSTEM FORECAST &amp; PREDICTIVE RISK:</strong>
-                    <div style="color: #CBD5E1; font-size: 0.84rem; margin-top: 2px;">
-                        Infrastructure reliability is <span style="color: #EF4444; font-weight: 700;">21.0% AT RISK</span>.
+                    <strong style="color: #F7F7F8; font-size: 0.92rem;">SYSTEM FORECAST &amp; PREDICTIVE RISK:</strong>
+                    <div style="color: #8B8988; font-size: 0.84rem; margin-top: 2px;">
+                        Infrastructure reliability is <span style="color: #F03B2A; font-weight: 700;">21.0% AT RISK</span>.
                         4 alerts and 3 incidents are rising in sectors with elevated Downlink BLER.
                     </div>
                 </div>
@@ -249,38 +249,38 @@ def render(pipeline: Any = None, dataset_tuple: Optional[Tuple] = None, benchmar
                 f"""
                 <div style="margin-top: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span style="font-size: 0.92rem; font-weight: 700; color: #F8FAFC;">{node_info['title']}</span>
+                        <span style="font-size: 0.92rem; font-weight: 700; color: #F7F7F8;">{node_info['title']}</span>
                         <span class="{node_info['status_class']}">{node_info['status']}</span>
                     </div>
                     
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #CBD5E1; margin-bottom: 12px;">
-                        <tr style="border-bottom: 1px solid #1A263D;">
-                            <td style="padding: 5px 0; color: #64748B;">Node Role / Type</td>
-                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['role']}</td>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #F7F7F8; margin-bottom: 12px;">
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">Node Role / Type</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['role']}</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #1A263D;">
-                            <td style="padding: 5px 0; color: #64748B;">IP Address</td>
-                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #38BDF8;">{node_info['ip']}</td>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">IP Address</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #D8B4FE;">{node_info['ip']}</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #1A263D;">
-                            <td style="padding: 5px 0; color: #64748B;">Uplink Gateway</td>
-                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #CBD5E1;">{node_info['switch']}</td>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">Uplink Gateway</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['switch']}</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #1A263D;">
-                            <td style="padding: 5px 0; color: #64748B;">PRB Spectrum Load</td>
-                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['prb']}</td>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">PRB Spectrum Load</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['prb']}</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #1A263D;">
-                            <td style="padding: 5px 0; color: #64748B;">Downlink BLER</td>
-                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: {'#EF4444' if 'DEGRADED' in node_info['status'] else '#10B981'};">{node_info['bler']}</td>
+                        <tr style="border-bottom: 1px solid rgba(147, 18, 255, 0.16);">
+                            <td style="padding: 5px 0; color: #8B8988;">Downlink BLER</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: {'#F03B2A' if 'DEGRADED' in node_info['status'] else '#45B558'};">{node_info['bler']}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 5px 0; color: #64748B;">Radio RSRP / SNR</td>
-                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F8FAFC;">{node_info['rsrp']} / {node_info['snr']}</td>
+                            <td style="padding: 5px 0; color: #8B8988;">Radio RSRP / SNR</td>
+                            <td style="padding: 5px 0; font-weight: 600; text-align: right; color: #F7F7F8;">{node_info['rsrp']} / {node_info['snr']}</td>
                         </tr>
                     </table>
 
-                    <div style="background: #080C14; border: 1px solid #1A263D; border-radius: 4px; padding: 8px 10px; font-size: 0.76rem; color: #94A3B8; line-height: 1.4; margin-bottom: 12px;">
+                    <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.22); border-radius: 8px; padding: 8px 10px; font-size: 0.76rem; color: #8B8988; line-height: 1.4; margin-bottom: 12px;">
                         {node_info['note']}
                     </div>
                 </div>

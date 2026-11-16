@@ -135,9 +135,9 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
 
         render_html(
             f"""
-            <div style="background: #0E1524; border: 1px solid #1A263D; border-left: 3px solid #0EA5E9;
-                        border-radius: 6px; padding: 12px 14px; margin-top: 10px; font-size: 0.84rem; color: #94A3B8;">
-                <strong style="color: #F8FAFC;">Engine Architecture:</strong> {selected_model_desc}
+            <div style="background: rgba(11, 9, 18, 0.9); border: 1px solid rgba(147, 18, 255, 0.24); border-left: 3px solid #A020FF;
+                        border-radius: 10px; padding: 12px 14px; margin-top: 10px; font-size: 0.84rem; color: #8B8988;">
+                <strong style="color: #F7F7F8;">Engine Architecture:</strong> {selected_model_desc}
             </div>
             """
         )
@@ -147,13 +147,12 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
         st.markdown("### 2. Alert Sensitivity Calibration")
 
         if not is_ml_mode:
-            st.markdown(
+            render_html(
                 """
-                <div style="font-size: 0.82rem; color: #64748B; margin-bottom: 8px;">
+                <div style="font-size: 0.82rem; color: #8B8988; margin-bottom: 8px;">
                     Calibrated for NOC operations to balance fault isolation against alarm fatigue:
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
             preset_choice = st.selectbox(
@@ -177,13 +176,12 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
             st.caption(f"Decision Boundary: Probability Cutoff = {threshold_val:.2f}")
 
         else:
-            st.markdown(
+            render_html(
                 """
-                <div style="font-size: 0.82rem; color: #38BDF8; margin-bottom: 8px;">
+                <div style="font-size: 0.82rem; color: #D8B4FE; margin-bottom: 8px;">
                     Advanced Mode Enabled — Continuous Decision Threshold Control:
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
             threshold_val = st.slider(
@@ -198,8 +196,8 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
 
             render_html(
                 f"""
-                <div style="background: #080C14; border: 1px solid #162032; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #CBD5E1;">
-                    <div>Cutoff: <strong style="color: #38BDF8;">tau = {threshold_val:.2f}</strong></div>
+                <div style="background: rgba(8, 6, 14, 0.9); border: 1px solid rgba(147, 18, 255, 0.24); border-radius: 10px; padding: 10px; font-size: 0.8rem; color: #F7F7F8;">
+                    <div>Cutoff: <strong style="color: #D8B4FE;">tau = {threshold_val:.2f}</strong></div>
                     <div>Validation F1: <strong>0.934</strong> | Test Precision: <strong>99.2%</strong></div>
                 </div>
                 """
@@ -208,10 +206,10 @@ def render(pipeline: Optional[AnomalyDetectorPipeline] = None, dataset_tuple: Op
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         render_html(
             f"""
-            <div style="background: #0B101B; border: 1px solid #1A263D; border-radius: 6px; padding: 12px;">
-                <div style="font-size: 0.68rem; color: #64748B; text-transform: uppercase;">Active Telemetry Target</div>
-                <div style="color: #F8FAFC; font-weight: 700; font-size: 0.92rem;">{active_name}</div>
-                <div style="color: #10B981; font-size: 0.78rem; margin-top: 2px;">● {len(active_df)} Cell Windows Loaded</div>
+            <div style="background: rgba(11, 9, 18, 0.92); border: 1px solid rgba(147, 18, 255, 0.24); border-radius: 10px; padding: 12px;">
+                <div style="font-size: 0.68rem; color: #8B8988; text-transform: uppercase;">Active Telemetry Target</div>
+                <div style="color: #F7F7F8; font-weight: 700; font-size: 0.92rem;">{active_name}</div>
+                <div style="color: #45B558; font-size: 0.78rem; margin-top: 2px;">● {len(active_df)} Cell Windows Loaded</div>
             </div>
             """
         )
